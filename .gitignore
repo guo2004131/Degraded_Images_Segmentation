@@ -1,10 +1,10 @@
 .idea/
 tf_logs/
 logs/
-*.npy
-*.pyc
-*.egg-info/
-*.py[cdo]
-
 build/
 dist/
+*.egg-info/
+*.npy
+*.pyc
+*.pth
+*.txt
