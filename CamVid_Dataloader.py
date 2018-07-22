@@ -57,15 +57,18 @@ class CamVidSeg(data.Dataset):
         (0, 0, 0),
     ])
     # TODO: Need to check if this is bgr or rgb: current is BGR
-    mean_bgr = np.array([0.4326707089857, 0.4251328133025, 0.41189489566336])*255
+    # mean_bgr = np.array([0.4326707089857, 0.4251328133025, 0.41189489566336])*255
     #TODO: Need to check if std is used.
-    std_bgr = np.array([0.28284674400252, 0.28506257482912, 0.27413549931506])*255
+    # std_bgr = np.array([0.28284674400252, 0.28506257482912, 0.27413549931506])*255
+    mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
 
     def __init__(self, root, split='train', dataset='o', transform=False):
         self.root = root
         self.split = split
         self._transform = transform
         self.datasets = collections.defaultdict()
+        # class 11 (the 12th class) is the ignored class
+        self.n_classes = 12
 
         self.datasets['o'] = osp.join(self.root, 'Original_Images')
         self.datasets['dbg1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_1')
@@ -129,7 +132,7 @@ class CamVidSeg(data.Dataset):
         img = img[:, :, ::-1]  # RGB -> BGR
         img = img.astype(np.float64)
         img -= self.mean_bgr
-        img /= self.std_bgr
+        # img /= self.std_bgr
         img = img.transpose(2, 0, 1)
         img = torch.from_numpy(img).float()
         lbl = torch.from_numpy(lbl).long()
@@ -138,7 +141,7 @@ class CamVidSeg(data.Dataset):
     def untransform(self, img, lbl):
         img = img.numpy()
         img = img.transpose(1, 2, 0)
-        img *= self.std_bgr
+        # img *= self.std_bgr
         img += self.mean_bgr
         img = img.astype(np.uint8)
         img = img[:, :, ::-1]

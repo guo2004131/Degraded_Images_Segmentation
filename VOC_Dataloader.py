@@ -43,6 +43,8 @@ class VOCSeg(data.Dataset):
         self.split = split
         self._transform = transform
         self.datasets = collections.defaultdict()
+        # class 0 is the background
+        self.n_classes = 21
 
         self.datasets['o'] = osp.join(self.root, 'Original_Images')
         self.datasets['dbg1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_1')
