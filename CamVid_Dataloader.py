@@ -8,35 +8,58 @@ import numpy as np
 import os.path as osp
 from torch.utils import data
 import matplotlib.pyplot as plt
-from fcn.utils import label2rgb
 
 
-class VOCSeg(data.Dataset):
+class CamVidSeg(data.Dataset):
 
     class_names = np.array([
-        'background',
-        'aeroplane',
-        'bicycle',
-        'bird',
-        'boat',
-        'bottle',
-        'bus',
+        'sky',
+        'building',
+        'column-pole',
+        'road',
+        'sidewalk',
+        'tree',
+        'sign',
+        'fence',
         'car',
-        'cat',
-        'chair',
-        'cow',
-        'diningtable',
-        'dog',
-        'horse',
-        'motorbike',
-        'person',
-        'potted plant',
-        'sheep',
-        'sofa',
-        'train',
-        'tv/monitor',
+        'pedestrian',
+        'bicyclist',
+        'void',
     ])
-    mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
+
+    class_weights = np.array([
+        0.58872014284134,
+        0.51052379608154,
+        2.6966278553009,
+        0.45021694898605,
+        1.1785038709641,
+        0.77028578519821,
+        2.4782588481903,
+        2.5273461341858,
+        1.0122526884079,
+        3.2375309467316,
+        4.1312313079834,
+        0,
+    ])
+
+    class_colors = np.array([
+        (128, 128, 128),
+        (128, 0, 0),
+        (192, 192, 128),
+        (128, 64, 128),
+        (0, 0, 192),
+        (128, 128, 0),
+        (192, 128, 128),
+        (64, 64, 128),
+        (64, 0, 128),
+        (64, 64, 0),
+        (0, 128, 192),
+        (0, 0, 0),
+    ])
+    # TODO: Need to check if this is bgr or rgb: current is BGR
+    mean_bgr = np.array([0.4326707089857, 0.4251328133025, 0.41189489566336])*255
+    #TODO: Need to check if std is used.
+    std_bgr = np.array([0.28284674400252, 0.28506257482912, 0.27413549931506])*255
 
     def __init__(self, root, split='train', dataset='o', transform=False):
         self.root = root
@@ -59,8 +82,8 @@ class VOCSeg(data.Dataset):
             imgsets_file = osp.join(root, '%s.txt' % split)
             for did in open(imgsets_file):
                 did = did.strip()
-                img_file = osp.join(img_dataset_dir, 'VOC_train_images/%s.jpg' % did)
-                lbl_file = osp.join(root, 'VOC_train_gt/%s.png' % did)
+                img_file = osp.join(img_dataset_dir, 'CamVid_train_images/%s.png' % did)
+                lbl_file = osp.join(root, 'CamVid_train_gt/%s.png' % did)
                 self.files[split].append({
                     'img': img_file,
                     'lbl': lbl_file,
@@ -68,8 +91,8 @@ class VOCSeg(data.Dataset):
         imgsets_file = osp.join(root, 'test.txt')
         for did in open(imgsets_file):
             did = did.strip()
-            img_file = osp.join(img_dataset_dir, 'VOC_test_images/%s.jpg' % did)
-            lbl_file = osp.join(root, 'VOC_test_gt/%s.png' % did)
+            img_file = osp.join(img_dataset_dir, 'CamVid_test_images/%s.png' % did)
+            lbl_file = osp.join(root, 'CamVid_test_gt/%s.png' % did)
             self.files['test'].append({
                 'img': img_file,
                 'lbl': lbl_file,
@@ -97,7 +120,7 @@ class VOCSeg(data.Dataset):
     def transform(self, img, lbl):
         random_crop = False
         if random_crop:
-            size = (np.array(lbl.shape) * 0.8).astype(np.uint32)
+            size = (np.array(lbl.shape)*0.8).astype(np.uint32)
             img, lbl = self.random_crop(img, lbl, size)
         random_flip = False
         if random_flip:
@@ -106,6 +129,7 @@ class VOCSeg(data.Dataset):
         img = img[:, :, ::-1]  # RGB -> BGR
         img = img.astype(np.float64)
         img -= self.mean_bgr
+        img /= self.std_bgr
         img = img.transpose(2, 0, 1)
         img = torch.from_numpy(img).float()
         lbl = torch.from_numpy(lbl).long()
@@ -114,12 +138,22 @@ class VOCSeg(data.Dataset):
     def untransform(self, img, lbl):
         img = img.numpy()
         img = img.transpose(1, 2, 0)
+        img *= self.std_bgr
         img += self.mean_bgr
         img = img.astype(np.uint8)
         img = img[:, :, ::-1]
-        # convert to color images
-        color_lbl = label2rgb(lbl)
-        return img, color_lbl
+        lbl = self.label_to_pil_image(lbl)
+        return img, lbl
+
+    def label_to_pil_image(self, lbl):
+        color_lbl = torch.zeros(3, lbl.size(0), lbl.size(1)).byte()
+        for i, color in enumerate(self.class_colors):
+            mask = lbl.eq(i)
+            for j in range(3):
+                color_lbl[j].masked_fill_(mask, color[j])
+        npimg = color_lbl.numpy()
+        npimg = np.transpose(npimg, (1, 2, 0))
+        return npimg
 
     def random_crop(self, img, lbl, size):
         h, w = lbl.shape
@@ -140,8 +174,8 @@ class VOCSeg(data.Dataset):
 
 # For code testing
 if __name__ == "__main__":
-    root = '/home/dg/Dropbox/Datasets/PASCALVOC'
-    dataset = VOCSeg(root, split='test', dataset='o', transform=True)
+    root = '/home/dg/Dropbox/Datasets/CamVid'
+    dataset = CamVidSeg(root, split='train', dataset='o', transform=True)
     img, lbl = dataset.__getitem__(1)
     img, lbl = dataset.untransform(img, lbl)
     plt.subplot(211)
@@ -149,3 +183,13 @@ if __name__ == "__main__":
     plt.subplot(212)
     plt.imshow(lbl)
     plt.show()
+
+    # dataset = CamVidSeg(root, split='train', dataset='o', transform=False)
+    # mean_img = np.zeros((360, 480, 3))
+    # for i in range(dataset.__len__()):
+    #     img, lbl = dataset.__getitem__(i)
+    #     mean_img += img
+    # mean_img.transpose(2, 0, 1)
+    # print (np.mean(mean_img[0]/dataset.__len__()))
+    # print (np.mean(mean_img[1]/dataset.__len__()))
+    # print (np.mean(mean_img[2]/dataset.__len__()))
