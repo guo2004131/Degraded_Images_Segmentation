@@ -1,5 +1,6 @@
 .idea/
 tf_logs/
+logs/
 *.npy
 *.pyc
 *.egg-info/
