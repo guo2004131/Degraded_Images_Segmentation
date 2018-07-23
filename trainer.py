@@ -1,42 +1,12 @@
-import datetime
-import math
-import os
-import os.path as osp
-import shutil
-import torchfcn
-
 import fcn
-import numpy as np
-import pytz
-import scipy.misc
-import torch
-from torch.autograd import Variable
-import torch.nn.functional as F
+import math
 import tqdm
-from distutils.version import LooseVersion
+import shutil
+import scipy.misc
+import numpy as np
+from torch.autograd import Variable
 
-
-def cross_entropy2d(input, target, weight=None, size_average=True):
-    # input: (n, c, h, w), target: (n, h, w)
-    n, c, h, w = input.size()
-    # log_p: (n, c, h, w)
-    if LooseVersion(torch.__version__) < LooseVersion('0.3'):
-        # ==0.2.X
-        log_p = F.log_softmax(input)
-    else:
-        # >=0.3
-        log_p = F.log_softmax(input, dim=1)
-    # log_p: (n*h*w, c)
-    log_p = log_p.transpose(1, 2).transpose(2, 3).contiguous()
-    log_p = log_p[target.view(n, h, w, 1).repeat(1, 1, 1, c) >= 0]
-    log_p = log_p.view(-1, c)
-    # target: (n*h*w,)
-    mask = target >= 0
-    target = target[mask]
-    loss = F.nll_loss(log_p, target, weight=weight, size_average=False)
-    if size_average:
-        loss /= mask.data.sum()
-    return loss
+from utils import *
 
 
 class Trainer(object):

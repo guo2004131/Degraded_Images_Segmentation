@@ -1,16 +1,6 @@
 #!/usr/bin/env python
 
-import os
-import pytz
-import yaml
-import shlex
-import torch
-import datetime
 import argparse
-import torchfcn
-import subprocess
-import os.path as osp
-
 from utils import *
 from VOC_Dataloader import *
 from trainer import Trainer
