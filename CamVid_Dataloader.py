@@ -26,7 +26,7 @@ class CamVidSeg(data.Dataset):
         'bicyclist',
         'void',
     ])
-
+    # Class weights by inferno
     class_weights = np.array([
         0.58872014284134,
         0.51052379608154,
@@ -42,6 +42,22 @@ class CamVidSeg(data.Dataset):
         0,
     ])
 
+    # Class weights by SegNet
+    # class_weights = np.array([
+    #     0.2595,
+    #     0.1826,
+    #     4.5640,
+    #     0.1417,
+    #     0.9051,
+    #     0.3826,
+    #     9.6446,
+    #     1.8418,
+    #     0.6823,
+    #     6.2478,
+    #     7.3614,
+    #     0,
+    # ])
+
     class_colors = np.array([
         (128, 128, 128),
         (128, 0, 0),
@@ -56,10 +72,11 @@ class CamVidSeg(data.Dataset):
         (0, 128, 192),
         (0, 0, 0),
     ])
-    # TODO: Need to check if this is bgr or rgb: current is BGR
+    # TODO: Provided by Inferno. Need to check if this is bgr or rgb: current is BGR
     # mean_bgr = np.array([0.4326707089857, 0.4251328133025, 0.41189489566336])*255
-    #TODO: Need to check if std is used.
+    # TODO: Provided by Inferno. Need to check if std is used.
     # std_bgr = np.array([0.28284674400252, 0.28506257482912, 0.27413549931506])*255
+    # TODO: Provided by MeetShah. Maybe this is not correct.
     mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
 
     def __init__(self, root, split='train', dataset='o', transform=False):
@@ -71,11 +88,11 @@ class CamVidSeg(data.Dataset):
         self.n_classes = 12
 
         self.datasets['o'] = osp.join(self.root, 'Original_Images')
-        self.datasets['dbg1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_1')
-        self.datasets['dbm1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_1')
+        self.datasets['bg1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_1')
+        self.datasets['bm1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_1')
         self.datasets['hi1'] = osp.join(self.root, 'Degraded_Images', 'Haze_I', 'degraded_parameter_1')
         self.datasets['ho1'] = osp.join(self.root, 'Degraded_Images', 'Haze_O', 'degraded_parameter_1')
-        self.datasets['np1'] = osp.join(self.root, 'Degraded_Images', 'Noise_Poisson', 'degraded_parameter_1')
+        self.datasets['ns1'] = osp.join(self.root, 'Degraded_Images', 'Noise_Speckle', 'degraded_parameter_1')
         self.datasets['nsp1'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_1')
 
         img_dataset_dir = osp.join(self.root, self.datasets[dataset])
@@ -145,18 +162,18 @@ class CamVidSeg(data.Dataset):
         img += self.mean_bgr
         img = img.astype(np.uint8)
         img = img[:, :, ::-1]
-        lbl = self.label_to_pil_image(lbl)
+        lbl = self.label_to_color_image(lbl)
         return img, lbl
 
-    def label_to_pil_image(self, lbl):
+    def label_to_color_image(self, lbl):
         color_lbl = torch.zeros(3, lbl.size(0), lbl.size(1)).byte()
         for i, color in enumerate(self.class_colors):
             mask = lbl.eq(i)
             for j in range(3):
                 color_lbl[j].masked_fill_(mask, color[j])
-        npimg = color_lbl.numpy()
-        npimg = np.transpose(npimg, (1, 2, 0))
-        return npimg
+        color_lbl = color_lbl.numpy()
+        color_lbl = np.transpose(color_lbl, (1, 2, 0))
+        return color_lbl
 
     def random_crop(self, img, lbl, size):
         h, w = lbl.shape

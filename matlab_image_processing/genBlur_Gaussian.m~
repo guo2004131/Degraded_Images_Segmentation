@@ -1,0 +1,40 @@
+clear; close all; clc;
+%% setup blur degree -- blur_delta
+blur_delta = 6;
+
+%% setup pth
+train_images_pth = '/home/dg/Dropbox/Datasets/PASCALVOC/Original_Images/VOC_train_images';
+test_images_pth = '/home/dg/Dropbox/Datasets/PASCALVOC/Original_Images/VOC_test_images';
+
+train_out_pth = '/home/dg/Dropbox/Datasets/PASCALVOC/Degraded_Images/Blur_Gaussian';
+test_out_pth = '/home/dg/Dropbox/Datasets/PASCALVOC/Degraded_Images/Blur_Gaussian';
+
+train_out_folder = sprintf('/home/dg/Dropbox/Datasets/PASCALVOC/Degraded_Images/Blur_Gaussian/degraded_parameter_%d/VOC_train_images', blur_delta);
+test_out_folder = sprintf('/home/dg/Dropbox/Datasets/PASCALVOC/Degraded_Images/Blur_Gaussian/degraded_parameter_%d/VOC_test_images', blur_delta);
+
+if ~exist(train_out_folder, 'dir')
+    mkdir(train_out_folder);
+end
+if ~exist(test_out_folder, 'dir')
+    mkdir(test_out_folder);
+end
+%% images files
+train_images = dir(fullfile(train_images_pth, '*.jpg'));
+test_images = dir(fullfile(test_images_pth, '*.jpg'));
+
+%% Game on
+parfor i = 1:size(train_images, 1)
+   fprintf('Now: %d/%d\n', i, size(train_images,1));
+   I = imread(fullfile(train_images_pth, train_images(i).name));
+   Iblur = imgaussfilt(I, blur_delta);
+   output_filename = fullfile(train_out_folder, train_images(i).name);
+   imwrite(Iblur, output_filename);
+end
+
+parfor i = 1:size(test_images, 1)
+   fprintf('Now: %d/%d\n', i, size(test_images,1));
+   I = imread(fullfile(test_images_pth, test_images(i).name));
+   Iblur = imgaussfilt(I, blur_delta);
+   output_filename = fullfile(test_out_folder, test_images(i).name);
+   imwrite(Iblur, output_filename);
+end

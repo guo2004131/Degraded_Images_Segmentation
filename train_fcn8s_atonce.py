@@ -50,19 +50,19 @@ def main():
 
     # 1. dataset
 
-    root = osp.expanduser('/home/dg/Dropbox/Datasets/PASCALVOC/')
+    root = osp.expanduser('/home/dg/Dropbox/Datasets/VOC/')
     kwargs = {'num_workers': 4, 'pin_memory': True} if cuda else {}
-    train_loader = torch.utils.data.DataLoader(VOCSeg(root, split='train', dataset='o', transform=True),
-                                               batch_size=1, shuffle=True, **kwargs)
-    val_loader = torch.utils.data.DataLoader(VOCSeg(root, split='val', dataset='o', transform=True),
-                                             batch_size=1, shuffle=False, **kwargs)
-    test_loader = torch.utils.data.DataLoader(VOCSeg(root, split='test', dataset='o', transform=True),
-                                              batch_size=1, shuffle=False, **kwargs)
+    train_data = VOCSeg(root, split='train', dataset='o', transform=True)
+    train_loader = torch.utils.data.DataLoader(train_data,batch_size=1, shuffle=True, **kwargs)
+    val_data = VOCSeg(root, split='val', dataset='o', transform=True)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=1, shuffle=False, **kwargs)
+    test_data = VOCSeg(root, split='test', dataset='o', transform=True)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, **kwargs)
 
-    # # 2. model
+    # 2. model
     #
-    # model = torchfcn.models.FCN8sAtOnce(n_class=21)
-    # start_epoch = 0
+    model = torchfcn.models.FCN8sAtOnce(n_class=train_data.n_classes)
+    start_epoch = 0
     # start_iteration = 0
     # if resume:
     #     checkpoint = torch.load(resume)
