@@ -47,9 +47,13 @@ class VOCSeg(data.Dataset):
         self.n_classes = 21
 
         self.datasets['o'] = osp.join(self.root, 'Original_Images')
+
         self.datasets['bg1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_1')
         self.datasets['bg2'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_2')
+        self.datasets['bg3'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_3')
         self.datasets['bg4'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_4')
+        self.datasets['bg5'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_5')
+
         self.datasets['bm10'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_10')
         self.datasets['bm20'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_20')
         self.datasets['hi1'] = osp.join(self.root, 'Degraded_Images', 'Haze_I', 'degraded_parameter_1')
@@ -60,6 +64,7 @@ class VOCSeg(data.Dataset):
         img_dataset_dir = osp.join(self.root, self.datasets[dataset])
 
         self.files = collections.defaultdict(list)
+
         for split in ['train', 'val']:
             imgsets_file = osp.join(root, '%s.txt' % split)
             for did in open(imgsets_file):
@@ -123,8 +128,8 @@ class VOCSeg(data.Dataset):
         img = img.astype(np.uint8)
         img = img[:, :, ::-1]
         # convert to color images
-        color_lbl = self.label_to_color_image(lbl)
-        return img, color_lbl
+        # lbl = self.label_to_color_image(lbl)
+        return img, lbl
 
     def label_to_color_image(self, lbl):
         return label2rgb(lbl)

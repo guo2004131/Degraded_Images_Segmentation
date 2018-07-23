@@ -13,6 +13,7 @@ import os.path as osp
 
 from utils import *
 from VOC_Dataloader import *
+from trainer import Trainer
 
 configurations = {
     # same configuration as original work
@@ -29,6 +30,7 @@ configurations = {
 
 
 def main():
+    # 0. input arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--gpu', type=int, default=1)
     parser.add_argument('-c', '--config', type=int, default=1,
@@ -43,65 +45,65 @@ def main():
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
     cuda = torch.cuda.is_available()
-
     torch.manual_seed(1337)
     if cuda:
         torch.cuda.manual_seed(1337)
 
     # 1. dataset
-
     root = osp.expanduser('/home/dg/Dropbox/Datasets/VOC/')
     kwargs = {'num_workers': 4, 'pin_memory': True} if cuda else {}
     train_data = VOCSeg(root, split='train', dataset='o', transform=True)
-    train_loader = torch.utils.data.DataLoader(train_data,batch_size=1, shuffle=True, **kwargs)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=1, shuffle=True, **kwargs)
+
     val_data = VOCSeg(root, split='val', dataset='o', transform=True)
     val_loader = torch.utils.data.DataLoader(val_data, batch_size=1, shuffle=False, **kwargs)
+
     test_data = VOCSeg(root, split='test', dataset='o', transform=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, **kwargs)
 
     # 2. model
-    #
     model = torchfcn.models.FCN8sAtOnce(n_class=train_data.n_classes)
     start_epoch = 0
-    # start_iteration = 0
-    # if resume:
-    #     checkpoint = torch.load(resume)
-    #     model.load_state_dict(checkpoint['model_state_dict'])
-    #     # start_epoch = checkpoint['epoch']
-    #     # start_iteration = checkpoint['iteration']
-    # else:
-    #     vgg16 = torchfcn.models.VGG16(pretrained=True)
-    #     model.copy_params_from_vgg16(vgg16)
-    # if cuda:
-    #     model = model.cuda()
-    #
-    # # 3. optimizer
-    #
-    # optim = torch.optim.SGD(
-    #     [
-    #         {'params': get_parameters(model, bias=False)},
-    #         {'params': get_parameters(model, bias=True),
-    #          'lr': cfg['lr'] * 2, 'weight_decay': 0},
-    #     ],
-    #     lr=cfg['lr'],
-    #     momentum=cfg['momentum'],
-    #     weight_decay=cfg['weight_decay'])
-    # if resume:
-    #     optim.load_state_dict(checkpoint['optim_state_dict'])
-    #
-    # trainer = torchfcn.Trainer(
-    #     cuda=cuda,
-    #     model=model,
-    #     optimizer=optim,
-    #     train_loader=train_loader,
-    #     val_loader=val_loader,
-    #     out=out,
-    #     max_iter=cfg['max_iteration'],
-    #     interval_validate=cfg.get('interval_validate', len(train_loader)),
-    # )
-    # trainer.epoch = start_epoch
-    # trainer.iteration = start_iteration
-    # trainer.train()
+    start_iteration = 0
+    if resume:
+        checkpoint = torch.load(resume)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        start_epoch = checkpoint['epoch']
+        start_iteration = checkpoint['iteration']
+    else:
+        vgg16 = torchfcn.models.VGG16(pretrained=True)
+        model.copy_params_from_vgg16(vgg16)
+    device = torch.device("cuda" if cuda else "cpu")
+    model = model.to(device)
+
+    # 3. optimizer
+    optim = torch.optim.SGD(
+        [
+            {'params': get_parameters(model, bias=False)},
+            {'params': get_parameters(model, bias=True),
+             'lr': cfg['lr'] * 2, 'weight_decay': 0},
+        ],
+        lr=cfg['lr'],
+        momentum=cfg['momentum'],
+        weight_decay=cfg['weight_decay'])
+    if resume:
+        optim.load_state_dict(checkpoint['optim_state_dict'])
+
+    # 4. trainer
+    trainer = Trainer(
+        cuda=cuda,
+        model=model,
+        optimizer=optim,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        test_loader=test_loader,
+        out=out,
+        max_iter=cfg['max_iteration'],
+        interval_validate=cfg.get('interval_validate', len(train_loader)),
+    )
+    trainer.epoch = start_epoch
+    trainer.iteration = start_iteration
+    trainer.train()
 
 
 if __name__ == '__main__':
