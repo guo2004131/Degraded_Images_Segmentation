@@ -22,8 +22,7 @@ class Trainer(object):
         self.val_loader = val_loader
         self.test_loader = test_loader
 
-        self.timestamp_start = \
-            datetime.datetime.now(pytz.timezone('Asia/Tokyo'))
+        self.timestamp_start = datetime.datetime.now(pytz.timezone('America/New_York'))
         self.size_average = size_average
 
         if interval_validate is None:
