@@ -3,6 +3,9 @@ tf_logs/
 logs/
 build/
 dist/
+image_gt_preprocessing/
+LeNet_MNIST_teaser/
+matlab_image_processing/
 *.egg-info/
 *.npy
 *.pyc
