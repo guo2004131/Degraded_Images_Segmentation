@@ -10,6 +10,7 @@ import datetime
 import scipy.misc
 import numpy as np
 import os.path as osp
+from collections import OrderedDict
 from torch.autograd import Variable
 
 
@@ -62,6 +63,11 @@ class Trainer(object):
         self.iteration = 0
         self.max_iter = max_iter
         self.best_mean_iu = 0
+        self.best_train_meanIoU = 0
+
+        self.t_logger = utils.Logger(self.out, 'train')
+        self.v_logger = utils.Logger(self.out, 'valid')
+        self.ts_logger = utils.Logger(self.out, 'test')
 
     def test(self):
         training = self.model.training
@@ -116,6 +122,22 @@ class Trainer(object):
             log = [self.epoch, self.iteration] + [''] * 5 + [test_loss] + list(metrics) + [elapsed_time]
             log = map(str, log)
             f.write(','.join(log) + '\n')
+
+        # logging information for tensorboard
+        info = OrderedDict({
+            "loss": test_loss,
+            "acc": metrics[0],
+            "acc_cls": metrics[1],
+            "meanIoU": metrics[2],
+            "fwavacc": metrics[3],
+            "bestIoU": self.best_mean_iu,
+        })
+        len(self.train_loader)
+        # msg = "\t".join([key + ":" + "%.4f" % value for key, value in info.items()])
+        partial_epoch = self.iteration / len(self.train_loader)
+        for tag, value in info.items():
+            self.ts_logger.scalar_summary(tag, value, partial_epoch)
+
         if training:
             self.model.train()
 
@@ -188,6 +210,21 @@ class Trainer(object):
             shutil.copy(osp.join(self.out, 'checkpoint.pth.tar'),
                         osp.join(self.out, 'model_best.pth.tar'))
 
+        # logging information for tensorboard
+        info = OrderedDict({
+            "loss": val_loss,
+            "acc": metrics[0],
+            "acc_cls": metrics[1],
+            "meanIoU": metrics[2],
+            "fwavacc": metrics[3],
+            "bestIoU": self.best_mean_iu,
+        })
+        len(self.train_loader)
+        # msg = "\t".join([key + ":" + "%.4f" % value for key, value in info.items()])
+        partial_epoch = self.iteration / len(self.train_loader)
+        for tag, value in info.items():
+            self.v_logger.scalar_summary(tag, value, partial_epoch)
+
         if training:
             self.model.train()
 
@@ -239,6 +276,20 @@ class Trainer(object):
                     metrics.tolist() + [''] * 5 + [elapsed_time]
                 log = map(str, log)
                 f.write(','.join(log) + '\n')
+
+            # logging to tensorboard
+            self.best_train_meanIoU = max(self.best_train_meanIoU, metrics[2])
+            info = OrderedDict({
+                "loss": loss.data[0],
+                "acc": metrics[0],
+                "acc_cls": metrics[1],
+                "meanIoU": metrics[2],
+                "fwavacc": metrics[3],
+                "bestIoU": self.best_train_meanIoU,
+            })
+            partialEpoch = self.epoch + float(batch_idx) / len(self.train_loader)
+            for tag, value in info.items():
+                self.t_logger.scalar_summary(tag, value, partialEpoch)
 
             if self.iteration >= self.max_iter:
                 break

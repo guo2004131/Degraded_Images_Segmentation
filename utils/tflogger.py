@@ -1,10 +1,11 @@
 # Code referenced from https://gist.github.com/gyglim/1f8dfb1b5c82627ae3efcfbbadb9f514
-import os.path as osp
+import pytz
 import shutil
-
-import tensorflow as tf
-import numpy as np
+import datetime
 import scipy.misc
+import numpy as np
+import os.path as osp
+import tensorflow as tf
 
 try:
     from StringIO import StringIO  # Python 2.7
@@ -13,9 +14,13 @@ except ImportError:
 
 
 class Logger(object):
-    def __init__(self, log_dir, restart=True):
+    def __init__(self, out, dataset, restart=True):
         """Create a summary writer logging to log_dir."""
-        log_dir = osp.expanduser(log_dir)
+        now = datetime.datetime.now(pytz.timezone('America/New_York'))
+        name = 'TF-%s' % now.strftime('%Y%m%d-%H%M%S')
+
+        # creat out dir
+        log_dir = osp.join(out, name, dataset)
         if restart and osp.exists(log_dir):
             shutil.rmtree(log_dir)
         self.writer = tf.summary.FileWriter(log_dir)

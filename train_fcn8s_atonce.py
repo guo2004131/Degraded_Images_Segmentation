@@ -27,8 +27,8 @@ configurations = {
 def main():
     # 0. input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=0)
-    parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='VOC')
+    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=1)
+    parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='CamVid')
     parser.add_argument('-dt', '--degradedtrain', help='o, bg, bm, hi, ho, ns, nsp', default='o')
     parser.add_argument('-dv', '--degradedval', help='o, bg, bm, hi, ho, ns, nsp', default='o')
     parser.add_argument('-ds', '--degradedtest', help='o, bg, bm, hi, ho, ns, nsp', default='o')
