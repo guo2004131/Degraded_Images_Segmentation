@@ -2,9 +2,8 @@
 
 import argparse
 from utils import *
-from VOC_Dataloader import *
-from trainer import Trainer
-
+from network_trainer import Trainer
+from datasets.VOC_Dataloader import *
 configurations = {
     # same configuration as original work
     # https://github.com/shelhamer/fcn.berkeleyvision.org

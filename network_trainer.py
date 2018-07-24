@@ -3,7 +3,6 @@ import math
 import tqdm
 import shutil
 import scipy.misc
-import numpy as np
 from torch.autograd import Variable
 
 from utils import *
