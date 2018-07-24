@@ -5,7 +5,7 @@ import pytz
 import yaml
 import shlex
 import torch
-import torchfcn
+import models
 import datetime
 import subprocess
 import os.path as osp
@@ -49,9 +49,9 @@ def get_parameters(model, bias=False):
         nn.MaxPool2d,
         nn.Dropout2d,
         nn.Sequential,
-        torchfcn.models.FCN32s,
-        torchfcn.models.FCN16s,
-        torchfcn.models.FCN8s,
+        models.FCN32s,
+        models.FCN16s,
+        models.FCN8s,
     )
     for m in model.modules():
         if isinstance(m, nn.Conv2d):

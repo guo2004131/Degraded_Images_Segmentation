@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
+import torchfcn
 import argparse
 from utils import *
 from network_trainer import Trainer
 from datasets.VOC_Dataloader import *
+
+
 configurations = {
     # same configuration as original work
     # https://github.com/shelhamer/fcn.berkeleyvision.org
@@ -51,7 +54,7 @@ def main():
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, **kwargs)
 
     # 2. model
-    model = torchfcn.models.FCN8sAtOnce(n_class=train_data.n_classes)
+    model = models.FCN8sAtOnce(n_class=train_data.n_classes)
     start_epoch = 0
     start_iteration = 0
     if resume:
