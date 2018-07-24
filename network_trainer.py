@@ -65,12 +65,12 @@ class Trainer(object):
 
         n_class = len(self.test_loader.dataset.class_names)
 
-        val_loss = 0
+        test_loss = 0
         visualizations = []
         label_trues, label_preds = [], []
         for batch_idx, (data, target) in tqdm.tqdm(
                 enumerate(self.test_loader), total=len(self.test_loader),
-                desc='Valid iteration=%d' % self.iteration, ncols=80,
+                desc='Test iteration=%d' % self.iteration, ncols=80,
                 leave=False):
             if self.cuda:
                 data, target = data.cuda(), target.cuda()
@@ -81,56 +81,39 @@ class Trainer(object):
                                    size_average=self.size_average)
             loss_data = float(loss.data[0])
             if np.isnan(loss_data):
-                raise ValueError('loss is nan while validating')
-            val_loss += loss_data / len(data)
+                raise ValueError('loss is nan while testing')
+            test_loss += loss_data / len(data)
 
             imgs = data.data.cpu()
             lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :]
             lbl_true = target.data.cpu().numpy()
             for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
-                img, lt = self.val_loader.dataset.untransform(img, lt)
+                img, lt = self.test_loader.dataset.untransform(img, lt)
                 label_trues.append(lt)
                 label_preds.append(lp)
                 if len(visualizations) < 9:
                     viz = fcn.utils.visualize_segmentation(
                         lbl_pred=lp, lbl_true=lt, img=img, n_class=n_class)
                     visualizations.append(viz)
-        metrics = torchfcn.utils.label_accuracy_score(
+        metrics = label_accuracy_score(
             label_trues, label_preds, n_class)
 
         out = osp.join(self.out, 'visualization_viz')
         if not osp.exists(out):
             os.makedirs(out)
-        out_file = osp.join(out, 'iter%012d.jpg' % self.iteration)
+        out_file = osp.join(out, 'iter_test_%012d.jpg' % self.iteration)
         scipy.misc.imsave(out_file, fcn.utils.get_tile_image(visualizations))
 
-        val_loss /= len(self.val_loader)
+        test_loss /= len(self.test_loader)
 
         with open(osp.join(self.out, 'log.csv'), 'a') as f:
             elapsed_time = (
                 datetime.datetime.now(pytz.timezone('Asia/Tokyo')) -
                 self.timestamp_start).total_seconds()
             log = [self.epoch, self.iteration] + [''] * 5 + \
-                  [val_loss] + list(metrics) + [elapsed_time]
+                  [test_loss] + list(metrics) + [elapsed_time]
             log = map(str, log)
             f.write(','.join(log) + '\n')
-
-        mean_iu = metrics[2]
-        is_best = mean_iu > self.best_mean_iu
-        if is_best:
-            self.best_mean_iu = mean_iu
-        torch.save({
-            'epoch': self.epoch,
-            'iteration': self.iteration,
-            'arch': self.model.__class__.__name__,
-            'optim_state_dict': self.optim.state_dict(),
-            'model_state_dict': self.model.state_dict(),
-            'best_mean_iu': self.best_mean_iu,
-        }, osp.join(self.out, 'checkpoint.pth.tar'))
-        if is_best:
-            shutil.copy(osp.join(self.out, 'checkpoint.pth.tar'),
-                        osp.join(self.out, 'model_best.pth.tar'))
-
         if training:
             self.model.train()
 
@@ -170,13 +153,12 @@ class Trainer(object):
                     viz = fcn.utils.visualize_segmentation(
                         lbl_pred=lp, lbl_true=lt, img=img, n_class=n_class)
                     visualizations.append(viz)
-        metrics = torchfcn.utils.label_accuracy_score(
-            label_trues, label_preds, n_class)
+        metrics = label_accuracy_score(label_trues, label_preds, n_class)
 
         out = osp.join(self.out, 'visualization_viz')
         if not osp.exists(out):
             os.makedirs(out)
-        out_file = osp.join(out, 'iter%012d.jpg' % self.iteration)
+        out_file = osp.join(out, 'iter_val_%012d.jpg' % self.iteration)
         scipy.misc.imsave(out_file, fcn.utils.get_tile_image(visualizations))
 
         val_loss /= len(self.val_loader)
@@ -223,6 +205,7 @@ class Trainer(object):
             self.iteration = iteration
 
             if self.iteration % self.interval_validate == 0:
+                self.validate()
                 self.test()
 
             assert self.model.training
@@ -244,9 +227,7 @@ class Trainer(object):
             metrics = []
             lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :]
             lbl_true = target.data.cpu().numpy()
-            acc, acc_cls, mean_iu, fwavacc = \
-                torchfcn.utils.label_accuracy_score(
-                    lbl_true, lbl_pred, n_class=n_class)
+            acc, acc_cls, mean_iu, fwavacc = label_accuracy_score(lbl_true, lbl_pred, n_class=n_class)
             metrics.append((acc, acc_cls, mean_iu, fwavacc))
             metrics = np.mean(metrics, axis=0)
 

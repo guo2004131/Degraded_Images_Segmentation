@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import torchfcn
+import datasets
 import argparse
 from utils import *
 from network_trainer import Trainer
-from datasets.VOC_Dataloader import *
 
 
 configurations = {
@@ -24,13 +24,20 @@ configurations = {
 def main():
     # 0. input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--gpu', type=int, default=1)
-    parser.add_argument('-c', '--config', type=int, default=1,
-                        choices=configurations.keys())
+    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=0)
+    parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='VOC')
+    parser.add_argument('-dt', '--degradedtrain', help='o, bg, bm, hi, ho, ns, nsp', default='o')
+    parser.add_argument('-dv', '--degradedval', help='o, bg, bm, hi, ho, ns, nsp', default='o')
+    parser.add_argument('-ds', '--degradedtest', help='o, bg, bm, hi, ho, ns, nsp', default='o')
+    parser.add_argument('-c', '--config', type=int, default=1, choices=configurations.keys())
     parser.add_argument('-r', '--resume', help='Checkpoint path')
     args = parser.parse_args()
 
     gpu = args.gpu
+    dataset = args.dataset
+    degradedtrain = args.degradedtrain
+    degradedval = args.degradedval
+    degradedtest = args.degradedtest
     cfg = configurations[args.config]
     out = get_log_dir('fcn8s-atonce', args.config, cfg)
     resume = args.resume
@@ -42,15 +49,23 @@ def main():
         torch.cuda.manual_seed(1337)
 
     # 1. dataset
-    root = osp.expanduser('/home/dg/Dropbox/Datasets/VOC/')
+    root = osp.expanduser('/home/dg/Dropbox/Datasets/%s/' % dataset)
     kwargs = {'num_workers': 4, 'pin_memory': True} if cuda else {}
-    train_data = VOCSeg(root, split='train', dataset='o', transform=True)
+    if dataset == 'VOC':
+        train_data = datasets.VOCSeg(root, split='train', dataset=degradedtrain, transform=True)
+        val_data = datasets.VOCSeg(root, split='val', dataset=degradedval, transform=True)
+        test_data = datasets.VOCSeg(root, split='test', dataset=degradedtest, transform=True)
+    elif dataset == "CamVid":
+        train_data = datasets.CamVidSeg(root, split='train', dataset=degradedtrain, transform=True)
+        val_data = datasets.CamVidSeg(root, split='val', dataset=degradedval, transform=True)
+        test_data = datasets.CamVidSeg(root, split='test', dataset=degradedtest, transform=True)
+    else:
+        train_data = datasets.SUNSeg(root, split='train', dataset=degradedtrain, transform=True)
+        val_data = datasets.SUNSeg(root, split='val', dataset=degradedval, transform=True)
+        test_data = datasets.SUNSeg(root, split='test', dataset=degradedtest, transform=True)
+
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=1, shuffle=True, **kwargs)
-
-    val_data = VOCSeg(root, split='val', dataset='o', transform=True)
     val_loader = torch.utils.data.DataLoader(val_data, batch_size=1, shuffle=False, **kwargs)
-
-    test_data = VOCSeg(root, split='test', dataset='o', transform=True)
     test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, **kwargs)
 
     # 2. model

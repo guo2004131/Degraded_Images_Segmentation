@@ -182,8 +182,9 @@ class SUNSeg(data.Dataset):
         img += self.mean_bgr
         img = img.astype(np.uint8)
         img = img[:, :, ::-1]
-        color_lbl = self.label_to_color_image(lbl)
-        return img, color_lbl
+        # convert to color lbl
+        # lbl = self.label_to_color_image(lbl)
+        return img, lbl
 
     def label_to_color_image(self, lbl):
         return label2rgb(lbl)
