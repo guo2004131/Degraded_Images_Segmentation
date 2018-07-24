@@ -215,8 +215,8 @@ class Trainer(object):
             data, target = Variable(data), Variable(target)
             self.optim.zero_grad()
             score = self.model(data)
-
-            loss = cross_entropy2d(score, target, size_average=self.size_average)
+            weights = torch.from_numpy(self.train_loader.dataset.class_weights).float().cuda()
+            loss = cross_entropy2d(score, target, weight=weights, size_average=self.size_average)
             loss /= len(data)
             loss_data = float(loss.data[0])
             if np.isnan(loss_data):
