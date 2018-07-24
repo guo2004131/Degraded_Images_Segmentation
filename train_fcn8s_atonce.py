@@ -1,9 +1,12 @@
 #!/usr/bin/env python
-
+import os
+import torch
+import utils
+import models
 import torchfcn
 import datasets
 import argparse
-from utils import *
+import os.path as osp
 from network_trainer import Trainer
 
 
@@ -39,7 +42,7 @@ def main():
     degradedval = args.degradedval
     degradedtest = args.degradedtest
     cfg = configurations[args.config]
-    out = get_log_dir('fcn8s-atonce', args.config, cfg)
+    out = utils.get_log_dir('fcn8s-atonce', args.config, cfg)
     resume = args.resume
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu)
@@ -86,8 +89,8 @@ def main():
     # 3. optimizer
     optim = torch.optim.SGD(
         [
-            {'params': get_parameters(model, bias=False)},
-            {'params': get_parameters(model, bias=True),
+            {'params': utils.get_parameters(model, bias=False)},
+            {'params': utils.get_parameters(model, bias=True),
              'lr': cfg['lr'] * 2, 'weight_decay': 0},
         ],
         lr=cfg['lr'],

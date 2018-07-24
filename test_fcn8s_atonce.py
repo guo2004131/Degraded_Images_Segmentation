@@ -50,7 +50,7 @@ def main():
     device = torch.device("cuda" if cuda else "cpu")
     model = model.to(device)
 
-    # 4. trainer
+    # 3. tester
     tester = Tester(
         cuda=cuda,
         model=model,
