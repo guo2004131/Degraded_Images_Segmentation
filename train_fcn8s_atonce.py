@@ -105,7 +105,7 @@ def main():
         model=model,
         optimizer=optim,
         train_loader=train_loader,
-        val_loader=test_loader,
+        val_loader=val_loader,
         test_loader=test_loader,
         out=out,
         max_iter=cfg['max_iteration'],
