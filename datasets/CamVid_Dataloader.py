@@ -167,6 +167,8 @@ class CamVidSeg(data.Dataset):
         return img, lbl
 
     def label_to_color_image(self, lbl):
+        if type(lbl) is np.ndarray:
+            lbl = torch.from_numpy(lbl)
         color_lbl = torch.zeros(3, lbl.size(0), lbl.size(1)).byte()
         for i, color in enumerate(self.class_colors):
             mask = lbl.eq(i)
