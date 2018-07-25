@@ -29,6 +29,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=1)
     parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='CamVid')
+    parser.add_argument('-dr', '--datasetroot', help='dataset root pth', default='/home/dg/Dropbox/Datasets')
     parser.add_argument('-dt', '--degradedtrain', help='o, bg, bm, hi, ho, ns, nsp', default='o')
     parser.add_argument('-dv', '--degradedval', help='o, bg, bm, hi, ho, ns, nsp', default='o')
     parser.add_argument('-ds', '--degradedtest', help='o, bg, bm, hi, ho, ns, nsp', default='o')
@@ -38,6 +39,7 @@ def main():
 
     gpu = args.gpu
     dataset = args.dataset
+    dataset_root = args.datasetroot
     degradedtrain = args.degradedtrain
     degradedval = args.degradedval
     degradedtest = args.degradedtest
@@ -52,7 +54,7 @@ def main():
         torch.cuda.manual_seed(1337)
 
     # 1. dataset
-    root = osp.expanduser('/home/dg/Dropbox/Datasets/%s/' % dataset)
+    root = osp.expanduser(osp.join(dataset_root, dataset))
     kwargs = {'num_workers': 4, 'pin_memory': True} if cuda else {}
     if dataset == 'VOC':
         train_data = datasets.VOCSeg(root, split='train', dataset=degradedtrain, transform=True)

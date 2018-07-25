@@ -12,12 +12,14 @@ def main():
     parser.add_argument('-m', '--model', help='Checkpoint path')
     parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=1)
     parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='VOC')
+    parser.add_argument('-dr', '--datasetroot', help='dataset root pth', default='/home/dg/Dropbox/Datasets')
     parser.add_argument('-ds', '--degradedtest', help='o, bg, bm, hi, ho, ns, nsp', default='o')
     args = parser.parse_args()
 
     test_model = args.model
     gpu = args.gpu
     dataset = args.dataset
+    dataset_root = args.datasetroot
     degradedtest = args.degradedtest
     out = get_log_test_dir('fcn8s-atonce', dataset, degradedtest, test_model)
 
@@ -28,7 +30,7 @@ def main():
         torch.cuda.manual_seed(1337)
 
     # 1. dataset
-    root = osp.expanduser('/home/dg/Dropbox/Datasets/%s/' % dataset)
+        root = osp.expanduser(osp.join(dataset_root, dataset))
     kwargs = {'num_workers': 4, 'pin_memory': True} if cuda else {}
     if dataset == 'VOC':
         test_data = datasets.VOCSeg(root, split='test', dataset=degradedtest, transform=True)
