@@ -243,7 +243,7 @@ class Trainer(object):
 
             if self.iteration % self.interval_validate == 0:
                 self.validate()
-                self.test()
+                # self.test()
 
             assert self.model.training
 
