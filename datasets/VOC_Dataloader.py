@@ -62,7 +62,7 @@ class VOCSeg(data.Dataset):
     ])
 
     mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
-    class_ignore = 0
+    class_ignore = -1
 
     def __init__(self, root, split='train', dataset='o', transform=False):
         self.root = root
@@ -155,9 +155,8 @@ class VOCSeg(data.Dataset):
         img = img[:, :, ::-1]
         # convert to color images
         # lbl = self.label_to_color_image(lbl)
-        lbl[lbl >= 255] = self.class_ignore
-        lbl[lbl < 0] = self.class_ignore
-        lbl = lbl.astype(np.uint8)
+        lbl[lbl == 255] = -1
+        lbl = lbl.astype(np.int8)
         return img, lbl
 
     def label_to_color_image(self, lbl):

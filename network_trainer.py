@@ -61,6 +61,7 @@ class Trainer(object):
 
         self.epoch = 0
         self.iteration = 0
+        self.ignore = self.train_loader.dataset.class_ignore
         self.max_iter = max_iter
         self.best_mean_iu = 0
         self.best_train_meanIoU = 0
@@ -94,7 +95,7 @@ class Trainer(object):
             test_loss += loss_data / len(data)
 
             imgs = data.data.cpu()
-            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.uint8)
+            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.int8)
             lbl_true = target.data.cpu().numpy()
             for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
                 img, lt = self.test_loader.dataset.untransform(img, lt)
@@ -104,8 +105,7 @@ class Trainer(object):
                     viz = fcn.utils.visualize_segmentation(
                         lbl_pred=lp, lbl_true=lt, img=img, n_class=n_class)
                     visualizations.append(viz)
-        metrics = utils.label_accuracy_score(
-            label_trues, label_preds, n_class)
+        metrics = utils.label_accuracy_score(label_trues, label_preds, n_class, ignore=self.ignore)
 
         out = osp.join(self.out, 'visualization_viz')
         if not osp.exists(out):
@@ -117,9 +117,9 @@ class Trainer(object):
 
         with open(osp.join(self.out, 'log.csv'), 'a') as f:
             elapsed_time = (
-                datetime.datetime.now(pytz.timezone('Asia/Tokyo')) -
+                datetime.datetime.now(pytz.timezone('America/New_York')) -
                 self.timestamp_start).total_seconds()
-            log = [self.epoch, self.iteration] + [''] * 5 + [test_loss] + list(metrics) + [elapsed_time]
+            log = [self.epoch, self.iteration] + [''] * 5 + [test_loss] + list(metrics[0:-1]) + [elapsed_time]
             log = map(str, log)
             f.write(','.join(log) + '\n')
 
@@ -132,8 +132,9 @@ class Trainer(object):
             "fwavacc": metrics[3],
             "bestIoU": self.best_mean_iu,
         })
-        len(self.train_loader)
-        # msg = "\t".join([key + ":" + "%.4f" % value for key, value in info.items()])
+        for i in range(len(self.test_loader.dataset.class_names)):
+            if i != self.ignore:
+                info['IoU '+self.test_loader.dataset.class_names[i]] = metrics[4][i]
         partial_epoch = self.iteration / len(self.train_loader)
         for tag, value in info.items():
             self.ts_logger.scalar_summary(tag, value, partial_epoch)
@@ -166,7 +167,7 @@ class Trainer(object):
             val_loss += loss_data / len(data)
 
             imgs = data.data.cpu()
-            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.uint8)
+            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.int8)
             lbl_true = target.data.cpu().numpy()
             for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
                 img, lt = self.val_loader.dataset.untransform(img, lt)
@@ -176,7 +177,7 @@ class Trainer(object):
                     viz = fcn.utils.visualize_segmentation(
                         lbl_pred=lp, lbl_true=lt, img=img, n_class=n_class)
                     visualizations.append(viz)
-        metrics = utils.label_accuracy_score(label_trues, label_preds, n_class)
+        metrics = utils.label_accuracy_score(label_trues, label_preds, n_class, ignore=self.ignore)
 
         out = osp.join(self.out, 'visualization_viz')
         if not osp.exists(out):
@@ -188,9 +189,9 @@ class Trainer(object):
 
         with open(osp.join(self.out, 'log.csv'), 'a') as f:
             elapsed_time = (
-                datetime.datetime.now(pytz.timezone('Asia/Tokyo')) -
+                datetime.datetime.now(pytz.timezone('America/New_York')) -
                 self.timestamp_start).total_seconds()
-            log = [self.epoch, self.iteration] + [''] * 5 + [val_loss] + list(metrics) + [elapsed_time]
+            log = [self.epoch, self.iteration] + [''] * 5 + [val_loss] + list(metrics[0:-1]) + [elapsed_time]
             log = map(str, log)
             f.write(','.join(log) + '\n')
 
@@ -219,8 +220,9 @@ class Trainer(object):
             "fwavacc": metrics[3],
             "bestIoU": self.best_mean_iu,
         })
-        len(self.train_loader)
-        # msg = "\t".join([key + ":" + "%.4f" % value for key, value in info.items()])
+        for i in range(len(self.val_loader.dataset.class_names)):
+            if i != self.ignore:
+                info['IoU '+self.val_loader.dataset.class_names[i]] = metrics[4][i]
         partial_epoch = self.iteration / len(self.train_loader)
         for tag, value in info.items():
             self.v_logger.scalar_summary(tag, value, partial_epoch)
@@ -244,6 +246,7 @@ class Trainer(object):
             if self.iteration % self.interval_validate == 0:
                 self.validate()
                 # self.test()
+                # pass
 
             assert self.model.training
 
@@ -253,8 +256,8 @@ class Trainer(object):
             self.optim.zero_grad()
             score = self.model(data)
             weights = torch.from_numpy(self.train_loader.dataset.class_weights).float().cuda()
-            ignore = self.train_loader.dataset.class_ignore
-            loss = utils.cross_entropy2d(score, target, weight=weights, size_average=self.size_average, ignore=ignore)
+            loss = utils.cross_entropy2d(score, target, weight=weights,
+                                         size_average=self.size_average, ignore=self.ignore)
             loss /= len(data)
             loss_data = float(loss.data[0])
             if np.isnan(loss_data):
@@ -263,18 +266,21 @@ class Trainer(object):
             self.optim.step()
 
             metrics = []
+            ius = []
             lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :]
             lbl_true = target.data.cpu().numpy()
-            acc, acc_cls, mean_iu, fwavacc = utils.label_accuracy_score(lbl_true, lbl_pred, n_class=n_class)
+            acc, acc_cls, mean_iu, fwavacc, iu = utils.label_accuracy_score(lbl_true, lbl_pred, n_class=n_class,
+                                                                            ignore=self.ignore)
             metrics.append((acc, acc_cls, mean_iu, fwavacc))
+            ius.append(iu)
             metrics = np.mean(metrics, axis=0)
+            ius = np.nanmean(ius, axis=0)
 
             with open(osp.join(self.out, 'log.csv'), 'a') as f:
                 elapsed_time = (
-                    datetime.datetime.now(pytz.timezone('Asia/Tokyo')) -
+                    datetime.datetime.now(pytz.timezone('America/New_York')) -
                     self.timestamp_start).total_seconds()
-                log = [self.epoch, self.iteration] + [loss_data] + \
-                    metrics.tolist() + [''] * 5 + [elapsed_time]
+                log = [self.epoch, self.iteration] + [loss_data] + list(metrics) + [''] * 5 + [elapsed_time]
                 log = map(str, log)
                 f.write(','.join(log) + '\n')
 
@@ -288,6 +294,9 @@ class Trainer(object):
                 "fwavacc": metrics[3],
                 "bestIoU": self.best_train_meanIoU,
             })
+            for i in range(len(self.train_loader.dataset.class_names)):
+                if i != self.ignore:
+                    info['IoU '+self.train_loader.dataset.class_names[i]] = ius[i]
             partialEpoch = self.epoch + float(batch_idx) / len(self.train_loader)
             for tag, value in info.items():
                 self.t_logger.scalar_summary(tag, value, partialEpoch)

@@ -28,6 +28,7 @@ def main():
     # 0. input arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=1)
+    parser.add_argument('-b', '--batch', type=int, help='batch size', default=1)
     parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='SUNRGBD')
     parser.add_argument('-dr', '--datasetroot', help='dataset root pth', default='/home/dg/Dropbox/Datasets')
     parser.add_argument('-dt', '--degradedtrain', help='o, bg, bm, hi, ho, ns, nsp', default='o')
@@ -38,6 +39,7 @@ def main():
     args = parser.parse_args()
 
     gpu = args.gpu
+    batch = args.batch
     dataset = args.dataset
     dataset_root = args.datasetroot
     degradedtrain = args.degradedtrain
@@ -69,9 +71,9 @@ def main():
         val_data = datasets.SUNSeg(root, split='val', dataset=degradedval, transform=True)
         test_data = datasets.SUNSeg(root, split='test', dataset=degradedtest, transform=True)
 
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=1, shuffle=True, **kwargs)
-    val_loader = torch.utils.data.DataLoader(val_data, batch_size=1, shuffle=False, **kwargs)
-    test_loader = torch.utils.data.DataLoader(test_data, batch_size=1, shuffle=False, **kwargs)
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch, shuffle=True, **kwargs)
+    val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch, shuffle=False, **kwargs)
+    test_loader = torch.utils.data.DataLoader(test_data, batch_size=batch, shuffle=False, **kwargs)
 
     # 2. model
     model = models.FCN8sAtOnce(n_class=train_data.n_classes)
