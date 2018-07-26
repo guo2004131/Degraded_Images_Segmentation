@@ -62,6 +62,7 @@ class VOCSeg(data.Dataset):
     ])
 
     mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
+    class_ignore = 0
 
     def __init__(self, root, split='train', dataset='o', transform=False):
         self.root = root

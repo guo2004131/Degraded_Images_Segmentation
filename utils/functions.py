@@ -34,7 +34,7 @@ def get_parameters(model, bias=False):
             raise ValueError('Unexpected module: %s' % str(m))
 
 
-def cross_entropy2d(input, target, weight=None, size_average=True):
+def cross_entropy2d(input, target, weight=None, size_average=True, ignore=-100):
     # input: (n, c, h, w), target: (n, h, w)
     n, c, h, w = input.size()
     # log_p: (n, c, h, w)
@@ -51,7 +51,7 @@ def cross_entropy2d(input, target, weight=None, size_average=True):
     # target: (n*h*w,)
     mask = target >= 0
     target = target[mask]
-    loss = F.nll_loss(log_p, target, weight=weight, size_average=False)
+    loss = F.nll_loss(log_p, target, weight=weight, size_average=False, ignore_index=ignore)
     if size_average:
         loss /= mask.data.sum()
     return loss
