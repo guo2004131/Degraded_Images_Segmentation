@@ -55,7 +55,6 @@ class SUNSeg(data.Dataset):
     ])
 
     class_weights = np.array([
-        0,
         0.351185,
         0.382592,
         0.447844,
@@ -98,6 +97,7 @@ class SUNSeg(data.Dataset):
 
     # TODO: Need to check if SUNRGBD follows PASCAL VOC rules
     mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
+    class_ignore = 0
 
     def __init__(self, root, split='train', dataset='o', transform=False):
         self.root = root
@@ -184,6 +184,7 @@ class SUNSeg(data.Dataset):
         img = img[:, :, ::-1]
         # convert to color lbl
         # lbl = self.label_to_color_image(lbl)
+        lbl = lbl.astype(np.uint8)
         return img, lbl
 
     def label_to_color_image(self, lbl):

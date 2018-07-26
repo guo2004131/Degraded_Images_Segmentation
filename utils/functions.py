@@ -34,7 +34,7 @@ def get_parameters(model, bias=False):
             raise ValueError('Unexpected module: %s' % str(m))
 
 
-def cross_entropy2d(input, target, weight=None, size_average=True):
+def cross_entropy2d(input, target, weight=None, size_average=True, ignore=-100):
     # input: (n, c, h, w), target: (n, h, w)
     n, c, h, w = input.size()
     # log_p: (n, c, h, w)
@@ -51,7 +51,7 @@ def cross_entropy2d(input, target, weight=None, size_average=True):
     # target: (n*h*w,)
     mask = target >= 0
     target = target[mask]
-    loss = F.nll_loss(log_p, target, weight=weight, size_average=False)
+    loss = F.nll_loss(log_p, target, weight=weight, size_average=False, ignore_index=ignore)
     if size_average:
         loss /= mask.data.sum()
     return loss
@@ -75,10 +75,10 @@ def label_accuracy_score(label_trues, label_preds, n_class):
     hist = np.zeros((n_class, n_class))
     for lt, lp in zip(label_trues, label_preds):
         hist += _fast_hist(lt.flatten(), lp.flatten(), n_class)
-    acc = np.diag(hist).sum() / hist.sum()
-    acc_cls = np.diag(hist) / hist.sum(axis=1)
+    acc = 1.0 * np.diag(hist).sum() / hist.sum()
+    acc_cls = 1.0 * np.diag(hist) / hist.sum(axis=1)
     acc_cls = np.nanmean(acc_cls)
-    iu = np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist))
+    iu = 1.0 * np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist))
     mean_iu = np.nanmean(iu)
     freq = hist.sum(axis=1) / hist.sum()
     fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()

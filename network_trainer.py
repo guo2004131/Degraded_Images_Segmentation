@@ -94,7 +94,7 @@ class Trainer(object):
             test_loss += loss_data / len(data)
 
             imgs = data.data.cpu()
-            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :]
+            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.uint8)
             lbl_true = target.data.cpu().numpy()
             for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
                 img, lt = self.test_loader.dataset.untransform(img, lt)
@@ -166,7 +166,7 @@ class Trainer(object):
             val_loss += loss_data / len(data)
 
             imgs = data.data.cpu()
-            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :]
+            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.uint8)
             lbl_true = target.data.cpu().numpy()
             for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
                 img, lt = self.val_loader.dataset.untransform(img, lt)
@@ -253,7 +253,8 @@ class Trainer(object):
             self.optim.zero_grad()
             score = self.model(data)
             weights = torch.from_numpy(self.train_loader.dataset.class_weights).float().cuda()
-            loss = utils.cross_entropy2d(score, target, weight=weights, size_average=self.size_average)
+            ignore = self.train_loader.dataset.class_ignore
+            loss = utils.cross_entropy2d(score, target, weight=weights, size_average=self.size_average, ignore=ignore)
             loss /= len(data)
             loss_data = float(loss.data[0])
             if np.isnan(loss_data):

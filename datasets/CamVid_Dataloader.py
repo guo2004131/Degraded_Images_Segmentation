@@ -78,6 +78,7 @@ class CamVidSeg(data.Dataset):
     # std_bgr = np.array([0.28284674400252, 0.28506257482912, 0.27413549931506])*255
     # TODO: Provided by MeetShah. Maybe this is not correct.
     mean_bgr = np.array([104.00698793, 116.66876762, 122.67891434])
+    class_ignore = 11
 
     def __init__(self, root, split='train', dataset='o', transform=False):
         self.root = root
@@ -164,6 +165,7 @@ class CamVidSeg(data.Dataset):
         img = img[:, :, ::-1]
         # convert to color lbl
         # lbl = self.label_to_color_image(lbl)
+        lbl = lbl.astype(np.uint8)
         return img, lbl
 
     def label_to_color_image(self, lbl):
