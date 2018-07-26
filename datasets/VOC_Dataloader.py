@@ -154,6 +154,7 @@ class VOCSeg(data.Dataset):
         img = img[:, :, ::-1]
         # convert to color images
         # lbl = self.label_to_color_image(lbl)
+        lbl = lbl.astype(np.uint8)
         return img, lbl
 
     def label_to_color_image(self, lbl):

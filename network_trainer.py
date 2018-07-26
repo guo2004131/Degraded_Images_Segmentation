@@ -166,7 +166,7 @@ class Trainer(object):
             val_loss += loss_data / len(data)
 
             imgs = data.data.cpu()
-            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :]
+            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.uint8)
             lbl_true = target.data.cpu().numpy()
             for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
                 img, lt = self.val_loader.dataset.untransform(img, lt)
