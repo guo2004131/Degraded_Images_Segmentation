@@ -155,7 +155,8 @@ class VOCSeg(data.Dataset):
         img = img[:, :, ::-1]
         # convert to color images
         # lbl = self.label_to_color_image(lbl)
-        lbl[lbl == 255] = self.class_ignore
+        lbl[lbl >= 255] = self.class_ignore
+        lbl[lbl < 0] = self.class_ignore
         lbl = lbl.astype(np.uint8)
         return img, lbl
 
