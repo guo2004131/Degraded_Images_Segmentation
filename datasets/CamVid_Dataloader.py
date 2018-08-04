@@ -89,11 +89,19 @@ class CamVidSeg(data.Dataset):
         self.n_classes = 12
 
         self.datasets['o'] = osp.join(self.root, 'Original_Images')
+        # blur -- Gaussian
         self.datasets['bg1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_1')
+        # blur -- motion
         self.datasets['bm1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_1')
-        self.datasets['hi1'] = osp.join(self.root, 'Degraded_Images', 'Haze_I', 'degraded_parameter_1')
-        self.datasets['ho1'] = osp.join(self.root, 'Degraded_Images', 'Haze_O', 'degraded_parameter_1')
+        # haze
+        self.datasets['h0.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_0.5')
+        self.datasets['h1'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1')
+        self.datasets['h1.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1.5')
+        self.datasets['h2'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_2')
+        self.datasets['h2.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_2.5')
+        # noise -- speckle
         self.datasets['ns1'] = osp.join(self.root, 'Degraded_Images', 'Noise_Speckle', 'degraded_parameter_1')
+        # noise -- salt & pepper
         self.datasets['nsp1'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_1')
 
         img_dataset_dir = osp.join(self.root, self.datasets[dataset])
