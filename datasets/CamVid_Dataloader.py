@@ -95,9 +95,9 @@ class CamVidSeg(data.Dataset):
         self.datasets['bm1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_1')
         # haze
         self.datasets['h0.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_0.5')
-        self.datasets['h1'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1')
+        self.datasets['h1.0'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1.0')
         self.datasets['h1.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1.5')
-        self.datasets['h2'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_2')
+        self.datasets['h2.0'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_2.0')
         self.datasets['h2.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_2.5')
         # noise -- speckle
         self.datasets['ns1'] = osp.join(self.root, 'Degraded_Images', 'Noise_Speckle', 'degraded_parameter_1')
