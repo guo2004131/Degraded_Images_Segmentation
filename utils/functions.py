@@ -87,3 +87,11 @@ def label_accuracy_score(label_trues, label_preds, n_class, ignore=-100):
     else:
         mean_iu = np.nanmean(iu)
     return acc, acc_cls, mean_iu, fwavacc, iu
+
+
+def gram_matrix(y):
+    (b, ch, h, w) = y.size()
+    features = y.view(b, ch, w * h)
+    features_t = features.transpose(1, 2)
+    gram = features.bmm(features_t) / (ch * h * w)
+    return gram

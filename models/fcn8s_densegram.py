@@ -1,5 +1,6 @@
 import fcn
 import torch
+import PIL.Image
 import torchvision
 import numpy as np
 import os.path as osp
@@ -441,7 +442,7 @@ class FCN8sAtOnceDenseGram(FCN8sDenseGram):
         h = self.relu3_2(self.conv3_2(h))
         f_3_2 = self.relu3_2_b(self.conv3_2_b(torch.cat([h, f_3_1], 1)))
         h = self.relu3_3(self.conv3_3(h))
-        f_3_3 = self.relu_3_3_b(self.conv3_3_b(torch.cat([h, f_3_1, f_3_2], 1)))
+        f_3_3 = self.relu3_3_b(self.conv3_3_b(torch.cat([h, f_3_1, f_3_2], 1)))
         h = self.pool3(h)
         pool3 = h  # 1/8
         # conv3 h_
@@ -450,7 +451,7 @@ class FCN8sAtOnceDenseGram(FCN8sDenseGram):
         h_ = self.relu3_2_(self.conv3_2_(h_))
         f_3_2_ = self.relu3_2_b_(self.conv3_2_b_(torch.cat([h_, f_3_1_], 1)))
         h_ = self.relu3_3_(self.conv3_3_(h_))
-        f_3_3_ = self.relu_3_3_b_(self.conv3_3_b_(torch.cat([h_, f_3_1_, f_3_2_], 1)))
+        f_3_3_ = self.relu3_3_b_(self.conv3_3_b_(torch.cat([h_, f_3_1_, f_3_2_], 1)))
         h_ = self.pool3_(h_)
         pool3_ = h_  # 1/8
 
@@ -787,6 +788,27 @@ if __name__ == "__main__":
     model_fcn8s = model_fcn8s['model_state_dict']
     model_vgg16 = torchvision.models.vgg16(pretrained=True)
     fcn8satoncedg.copy_params_from_vgg16_fcn8s(model_vgg16, model_fcn8s)
-    fcn8satoncedg.copy_params_from_fcn8s(model_fcn8s)
-    fcn8satoncedg.copy_params_from_vgg16(model_vgg16)
-    a = 1
+
+    # fcn8satoncedg.copy_params_from_fcn8s(model_fcn8s)
+    # fcn8satoncedg.copy_params_from_vgg16(model_vgg16)
+    img0 = PIL.Image.open('/home/dg/Dropbox/Datasets/CamVid/Original_Images/CamVid_test_images/0001TP_008550.png')
+    img1 = PIL.Image.open('/home/dg/Dropbox/Datasets/CamVid/Degraded_Images/Haze/degraded_parameter_1.5/CamVid_test_images/0001TP_008550.png')
+    img0 = np.asarray(img0)
+    img1 = np.asarray(img1)
+
+    img0 = img0[:, :, ::-1]
+    img0 = img0.transpose(2, 0, 1)
+    img0 = torch.from_numpy(img0.copy()).float()
+    img0 = img0.view(1, 3, 360, 480)
+
+    img1 = img1[:, :, ::-1]
+    img1 = img1.transpose(2, 0, 1)
+    img1 = torch.from_numpy(img1.copy()).float()
+    img1 = img1.view(1, 3, 360, 480)
+
+    fcn8satoncedg = fcn8satoncedg.cuda(device=0)
+    img0 = img0.cuda(device=0)
+    img1 = img1.cuda(device=0)
+    h, h_, gramouts = fcn8satoncedg(img0, img1)
+    print gramouts.f_5_3.shape
+    print gramouts.f_5_3_.shape
