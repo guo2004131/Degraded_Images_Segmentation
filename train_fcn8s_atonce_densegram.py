@@ -30,9 +30,7 @@ def main():
     parser.add_argument('-b', '--batch', type=int, help='batch size', default=1)
     parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='SUNRGBD')
     parser.add_argument('-dr', '--datasetroot', help='dataset root pth', default='/home/dg/Dropbox/Datasets')
-    parser.add_argument('-dt', '--degradedtrain', help='o, bg, bm, h, ns, nsp', default='o')
-    parser.add_argument('-dv', '--degradedval', help='o, bg, bm, h, ns, nsp', default='o')
-    parser.add_argument('-ds', '--degradedtest', help='o, bg, bm, h, ns, nsp', default='o')
+    parser.add_argument('-de', '--degradation', help='o, bg, bm, h, ns, nsp', default='o')
     parser.add_argument('-c', '--config', type=int, default=1, choices=configurations.keys())
     parser.add_argument('-r', '--resume', help='Checkpoint path')
     args = parser.parse_args()
@@ -41,9 +39,7 @@ def main():
     batch = args.batch
     dataset = args.dataset
     dataset_root = args.datasetroot
-    degradedtrain = args.degradedtrain
-    degradedval = args.degradedval
-    degradedtest = args.degradedtest
+    degradation = args.degradation
     cfg = configurations[args.config]
     out = utils.get_log_dir('fcn8s-atonce', args.config, cfg)
     resume = args.resume
@@ -58,17 +54,17 @@ def main():
     root = osp.expanduser(osp.join(dataset_root, dataset))
     kwargs = {'num_workers': 4, 'pin_memory': True} if cuda else {}
     if dataset == 'VOC':
-        train_data = datasets.VOCSeg(root, split='train', dataset=degradedtrain, transform=True)
-        val_data = datasets.VOCSeg(root, split='val', dataset=degradedval, transform=True)
-        test_data = datasets.VOCSeg(root, split='test', dataset=degradedtest, transform=True)
+        train_data = datasets.VOCSeg(root, split='train', dataset=degradation, transform=True)
+        val_data = datasets.VOCSeg(root, split='val', dataset=degradation, transform=True)
+        test_data = datasets.VOCSeg(root, split='test', dataset=degradation, transform=True)
     elif dataset == "CamVid":
-        train_data = datasets.CamVidSeg(root, split='train', dataset=degradedtrain, transform=True)
-        val_data = datasets.CamVidSeg(root, split='val', dataset=degradedval, transform=True)
-        test_data = datasets.CamVidSeg(root, split='test', dataset=degradedtest, transform=True)
+        train_data = datasets.CamVidSeg(root, split='train', dataset=degradation, transform=True)
+        val_data = datasets.CamVidSeg(root, split='val', dataset=degradation, transform=True)
+        test_data = datasets.CamVidSeg(root, split='test', dataset=degradation, transform=True)
     else:
-        train_data = datasets.SUNSeg(root, split='train', dataset=degradedtrain, transform=True)
-        val_data = datasets.SUNSeg(root, split='val', dataset=degradedval, transform=True)
-        test_data = datasets.SUNSeg(root, split='test', dataset=degradedtest, transform=True)
+        train_data = datasets.SUNSeg(root, split='train', dataset=degradation, transform=True)
+        val_data = datasets.SUNSeg(root, split='val', dataset=degradation, transform=True)
+        test_data = datasets.SUNSeg(root, split='test', dataset=degradation, transform=True)
 
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch, shuffle=True, **kwargs)
     val_loader = torch.utils.data.DataLoader(val_data, batch_size=batch, shuffle=False, **kwargs)

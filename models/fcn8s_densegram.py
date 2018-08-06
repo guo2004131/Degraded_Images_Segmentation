@@ -218,9 +218,8 @@ class FCN8sDenseGram(nn.Module):
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                # torch.nn.init.xavier_normal_(m.weight)
-                # test the dense outputs. Due to the random dropout, the last output is different
-                torch.nn.init.constant_(m.weight, 1)
+                torch.nn.init.xavier_normal_(m.weight)
+                # torch.nn.init.constant_(m.weight, 1)  # Due to the random dropout, the last output is different
                 # m.weight.data.zero_()
                 if m.bias is not None:
                     m.bias.data.zero_()
