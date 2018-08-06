@@ -24,6 +24,7 @@ class TrainerDG(object):
 
         self.model = model
         self.optim = optimizer
+        self.init_lr = optimizer.param_groups[0]['lr']
 
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -97,7 +98,7 @@ class TrainerDG(object):
             loss_gram = 0
             for g, g_ in zip(gram, gram_):
                 loss_gram += F.mse_loss(utils.gram_matrix(g), utils.gram_matrix(g_))
-            loss_gram /= len(gram)
+            # loss_gram /= len(gram)
             # overall loss
             loss = loss_seg + loss_gram
             # loss data
@@ -190,7 +191,7 @@ class TrainerDG(object):
             loss_gram = 0
             for g, g_ in zip(gram, gram_):
                 loss_gram += F.mse_loss(utils.gram_matrix(g), utils.gram_matrix(g_))
-            loss_gram /= len(gram)
+            # loss_gram /= len(gram)
             # overall loss
             loss = loss_seg + loss_gram
             # loss data
@@ -305,7 +306,7 @@ class TrainerDG(object):
             loss_gram = 0
             for g, g_ in zip(gram, gram_):
                 loss_gram += F.mse_loss(utils.gram_matrix(g), utils.gram_matrix(g_))
-            loss_gram /= len(gram)
+            # loss_gram /= len(gram)
 
             loss = loss_seg + loss_gram
             loss /= len(data_o)
@@ -314,6 +315,7 @@ class TrainerDG(object):
                 raise ValueError('loss is nan while training')
             loss.backward()
             self.optim.step()
+            self.poly_lr_scheduler(iteration)
 
             metrics = []
             ius = []
@@ -356,6 +358,11 @@ class TrainerDG(object):
 
             if self.iteration >= self.max_iter:
                 break
+
+    def poly_lr_scheduler(self, iter, power=0.9):
+        lr = self.init_lr * (1 - iter / self.max_iter) ** power
+        self.optim.param_groups[0]['lr'] = lr
+        self.optim.param_groups[1]['lr'] = 2*lr
 
     def train(self):
         max_epoch = int(math.ceil(1. * self.max_iter / len(self.train_loader)))

@@ -26,7 +26,7 @@ configurations = {
 def main():
     # 0. input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=1)
+    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=0)
     parser.add_argument('-b', '--batch', type=int, help='batch size', default=1)
     parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='CamVid')
     parser.add_argument('-dp', '--datasetpth', help='dataset root pth', default='/home/dg/Dropbox/Datasets')
