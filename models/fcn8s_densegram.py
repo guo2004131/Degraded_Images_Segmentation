@@ -801,6 +801,50 @@ class FCN8sAtOnceDenseGram(FCN8sDenseGram):
             l2.weight.data.copy_(l1.weight.data.view(l2.weight.size()))
             l2.bias.data.copy_(l1.bias.data.view(l2.bias.size()))
 
+    def freeze_params(self, t, s):
+        """
+        freeze network paramters
+        :param t: freeze teacher network parameters 0; update teacher network parameters (NOT 0)
+        :param s: freeze student network parameters 0; update student network parameters (NOT 0)
+        :return: N/A
+        """
+        features = [
+            self.conv1_1, self.conv1_2,
+            self.conv2_1, self.conv2_2,
+            self.conv3_1, self.conv3_2, self.conv3_3,
+            self.conv4_1, self.conv4_2, self.conv4_3,
+            self.conv5_1, self.conv5_2, self.conv5_3,
+            self.fc6, self.fc7,
+            self.score_fr,
+            self.score_pool3, self.score_pool4,
+            self.upscore2, self.upscore8,
+            self.upscore_pool4,
+        ]
+        features_ = [
+            self.conv1_1_, self.conv1_2_,
+            self.conv2_1_, self.conv2_2_,
+            self.conv3_1_, self.conv3_2_, self.conv3_3_,
+            self.conv4_1_, self.conv4_2_, self.conv4_3_,
+            self.conv5_1_, self.conv5_2_, self.conv5_3_,
+            self.fc6_, self.fc7_,
+            self.score_fr_,
+            self.score_pool3_, self.score_pool4_,
+            self.upscore2_, self.upscore8_,
+            self.upscore_pool4_,
+        ]
+        if t == 0:
+            for l in features:
+                l.weight.requires_grad = False
+        else:
+            for l in features:
+                l.weight.requires_grad = True
+        if s == 0:
+            for l in features_:
+                l.weight.requires_grad = False
+        else:
+            for l in features_:
+                l.weight.requires_grad = True
+
 
 # for code testing & debugging
 if __name__ == "__main__":
@@ -857,4 +901,9 @@ if __name__ == "__main__":
         loss = F.mse_loss(g1, g2)
         print loss
     print
+
+    # test freeze parameters
+    fcn8satoncedg.freeze_params(0, 1)
+    print fcn8satoncedg.conv1_1.weight.requires_grad
+    print fcn8satoncedg.conv1_1_.weight.requires_grad
 
