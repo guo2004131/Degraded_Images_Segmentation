@@ -14,7 +14,7 @@ configurations = {
     # same configuration as original work
     # https://github.com/shelhamer/fcn.berkeleyvision.org
     1: dict(
-        max_iteration=100000,
+        max_iteration=200000,
         lr=1.0e-10,
         momentum=0.99,
         weight_decay=0.0005,
@@ -26,7 +26,7 @@ configurations = {
 def main():
     # 0. input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=0)
+    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=1)
     parser.add_argument('-b', '--batch', type=int, help='batch size', default=1)
     parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='CamVid')
     parser.add_argument('-dp', '--datasetpth', help='dataset root pth', default='/home/dg/Dropbox/Datasets')
