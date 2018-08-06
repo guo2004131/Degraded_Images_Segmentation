@@ -10,11 +10,12 @@ import datetime
 import scipy.misc
 import numpy as np
 import os.path as osp
+import torch.nn.functional as F
 from collections import OrderedDict
 from torch.autograd import Variable
 
 
-class Trainer(object):
+class TrainerDG(object):
 
     def __init__(self, cuda, model, optimizer, train_loader, val_loader, test_loader, out, max_iter,
                  size_average=False, interval_validate=None):
@@ -77,33 +78,51 @@ class Trainer(object):
         n_class = len(self.test_loader.dataset.class_names)
 
         test_loss = 0
+        test_loss_seg = 0
+        test_loss_gram = 0
         visualizations = []
         label_trues, label_preds = [], []
-        for batch_idx, (data, target) in tqdm.tqdm(
+        for batch_idx, (data_o, data_d, target) in tqdm.tqdm(
                 enumerate(self.test_loader), total=len(self.test_loader),
                 desc='Test iteration=%d' % self.iteration, ncols=80,
                 leave=False):
             if self.cuda:
-                data, target = data.cuda(), target.cuda()
-            data, target = Variable(data, volatile=True), Variable(target)
-            score = self.model(data)
+                data_o, data_d, target = data_o.cuda(), data_d.cuda(), target.cuda()
+            data_o, data_d, target = Variable(data_o), Variable(data_d), Variable(target)
+            score, score_, gram, gram_ = self.model(data_o, data_d)
 
-            loss = utils.cross_entropy2d(score, target, size_average=self.size_average)
+            # segmentation loss
+            loss_seg = utils.cross_entropy2d(score_, target, size_average=self.size_average)
+            # gram loss
+            loss_gram = 0
+            for g, g_ in zip(gram, gram_):
+                loss_gram += F.mse_loss(utils.gram_matrix(g), utils.gram_matrix(g_))
+            loss_gram /= len(gram)
+            # overall loss
+            loss = loss_seg + loss_gram
+            # loss data
             loss_data = float(loss.data[0])
+            loss_seg_data = float(loss_seg.data[0])
+            loss_gram_data = float(loss_gram.data[0])
+
             if np.isnan(loss_data):
                 raise ValueError('loss is nan while testing')
-            test_loss += loss_data / len(data)
+            test_loss += loss_data / len(data_o)
+            test_loss_seg += loss_seg_data / len(data_o)
+            test_loss_gram += loss_gram_data / len(data_o)
 
-            imgs = data.data.cpu()
-            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.int8)
+            imgs_o = data_o.data.cpu()
+            imgs_d = data_d.data.cpu()
+            # predition from the student network -- score_
+            lbl_pred = score_.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.int8)
             lbl_true = target.data.cpu().numpy()
-            for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
-                img, lt = self.test_loader.dataset.untransform(img, lt)
+            for img_o, img_d, lt, lp in zip(imgs_o, imgs_d, lbl_true, lbl_pred):
+                img_o, img_d, lt = self.val_loader.dataset.untransform(img_o, img_d, lt)
                 label_trues.append(lt)
                 label_preds.append(lp)
                 if len(visualizations) < 9:
                     viz = fcn.utils.visualize_segmentation(
-                        lbl_pred=lp, lbl_true=lt, img=img, n_class=n_class)
+                        lbl_pred=lp, lbl_true=lt, img=img_d, n_class=n_class)
                     visualizations.append(viz)
         metrics = utils.label_accuracy_score(label_trues, label_preds, n_class, ignore=self.ignore)
 
@@ -114,6 +133,8 @@ class Trainer(object):
         scipy.misc.imsave(out_file, fcn.utils.get_tile_image(visualizations))
 
         test_loss /= len(self.test_loader)
+        test_loss_seg /= len(self.test_loader)
+        test_loss_gram /= len(self.test_loader)
 
         with open(osp.join(self.out, 'log.csv'), 'a') as f:
             elapsed_time = (
@@ -125,6 +146,8 @@ class Trainer(object):
 
         # logging information for tensorboard
         info = OrderedDict({
+            "loss_seg": test_loss_seg,
+            "loss_gram": test_loss_gram,
             "loss": test_loss,
             "acc": metrics[0],
             "acc_cls": metrics[1],
@@ -149,33 +172,50 @@ class Trainer(object):
         n_class = len(self.val_loader.dataset.class_names)
 
         val_loss = 0
+        val_loss_seg = 0
+        val_loss_gram = 0
         visualizations = []
         label_trues, label_preds = [], []
-        for batch_idx, (data, target) in tqdm.tqdm(
+        for batch_idx, (data_o, data_d, target) in tqdm.tqdm(
                 enumerate(self.val_loader), total=len(self.val_loader),
                 desc='Valid iteration=%d' % self.iteration, ncols=80,
                 leave=False):
             if self.cuda:
-                data, target = data.cuda(), target.cuda()
-            data, target = Variable(data, volatile=True), Variable(target)
-            score = self.model(data)
-
-            loss = utils.cross_entropy2d(score, target, size_average=self.size_average)
+                data_o, data_d, target = data_o.cuda(), data_d.cuda(), target.cuda()
+            data_o, data_d, target = Variable(data_o), Variable(data_d), Variable(target)
+            score, score_, gram, gram_ = self.model(data_o, data_d)
+            # segmentation loss
+            loss_seg = utils.cross_entropy2d(score_, target, size_average=self.size_average)
+            # gram loss
+            loss_gram = 0
+            for g, g_ in zip(gram, gram_):
+                loss_gram += F.mse_loss(utils.gram_matrix(g), utils.gram_matrix(g_))
+            loss_gram /= len(gram)
+            # overall loss
+            loss = loss_seg + loss_gram
+            # loss data
             loss_data = float(loss.data[0])
+            loss_seg_data = float(loss_seg.data[0])
+            loss_gram_data = float(loss_gram.data[0])
+
             if np.isnan(loss_data):
                 raise ValueError('loss is nan while validating')
-            val_loss += loss_data / len(data)
+            val_loss += loss_data / len(data_o)
+            val_loss_seg += loss_seg_data / len(data_o)
+            val_loss_gram += loss_gram_data / len(data_o)
 
-            imgs = data.data.cpu()
-            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.int8)
+            imgs_o = data_o.data.cpu()
+            imgs_d = data_d.data.cpu()
+            # predition from the student network -- score_
+            lbl_pred = score_.data.max(1)[1].cpu().numpy()[:, :, :].astype(np.int8)
             lbl_true = target.data.cpu().numpy()
-            for img, lt, lp in zip(imgs, lbl_true, lbl_pred):
-                img, lt = self.val_loader.dataset.untransform(img, lt)
+            for img_o, img_d, lt, lp in zip(imgs_o, imgs_d, lbl_true, lbl_pred):
+                img_o, img_d, lt = self.val_loader.dataset.untransform(img_o, img_d, lt)
                 label_trues.append(lt)
                 label_preds.append(lp)
                 if len(visualizations) < 9:
                     viz = fcn.utils.visualize_segmentation(
-                        lbl_pred=lp, lbl_true=lt, img=img, n_class=n_class)
+                        lbl_pred=lp, lbl_true=lt, img=img_d, n_class=n_class)
                     visualizations.append(viz)
         metrics = utils.label_accuracy_score(label_trues, label_preds, n_class, ignore=self.ignore)
 
@@ -186,6 +226,8 @@ class Trainer(object):
         scipy.misc.imsave(out_file, fcn.utils.get_tile_image(visualizations))
 
         val_loss /= len(self.val_loader)
+        val_loss_seg /= len(self.val_loader)
+        val_loss_gram /= len(self.val_loader)
 
         with open(osp.join(self.out, 'log.csv'), 'a') as f:
             elapsed_time = (
@@ -213,6 +255,8 @@ class Trainer(object):
 
         # logging information for tensorboard
         info = OrderedDict({
+            "loss_seg": val_loss_seg,
+            "loss_gram": val_loss_gram,
             "loss": val_loss,
             "acc": metrics[0],
             "acc_cls": metrics[1],
@@ -235,7 +279,7 @@ class Trainer(object):
 
         n_class = len(self.train_loader.dataset.class_names)
 
-        for batch_idx, (data, target) in tqdm.tqdm(
+        for batch_idx, (data_o, data_d, target) in tqdm.tqdm(
                 enumerate(self.train_loader), total=len(self.train_loader),
                 desc='Train epoch=%d' % self.epoch, ncols=80, leave=False):
             iteration = batch_idx + self.epoch * len(self.train_loader)
@@ -251,14 +295,20 @@ class Trainer(object):
             assert self.model.training
 
             if self.cuda:
-                data, target = data.cuda(), target.cuda()
-            data, target = Variable(data), Variable(target)
+                data_o, data_d, target = data_o.cuda(), data_d.cuda(), target.cuda()
+            data_o, data_d, target = Variable(data_o), Variable(data_d), Variable(target)
             self.optim.zero_grad()
-            score = self.model(data)
+            score, score_, gram, gram_ = self.model(data_o, data_d)
             weights = torch.from_numpy(self.train_loader.dataset.class_weights).float().cuda()
-            loss = utils.cross_entropy2d(score, target, weight=weights,
-                                         size_average=self.size_average, ignore=self.ignore)
-            loss /= len(data)
+            loss_seg = utils.cross_entropy2d(score_, target, weight=weights,
+                                             size_average=self.size_average, ignore=self.ignore)
+            loss_gram = 0
+            for g, g_ in zip(gram, gram_):
+                loss_gram += F.mse_loss(utils.gram_matrix(g), utils.gram_matrix(g_))
+            loss_gram /= len(gram)
+
+            loss = loss_seg + loss_gram
+            loss /= len(data_o)
             loss_data = float(loss.data[0])
             if np.isnan(loss_data):
                 raise ValueError('loss is nan while training')
@@ -267,7 +317,8 @@ class Trainer(object):
 
             metrics = []
             ius = []
-            lbl_pred = score.data.max(1)[1].cpu().numpy()[:, :, :]
+            # predition from the student network -- score_
+            lbl_pred = score_.data.max(1)[1].cpu().numpy()[:, :, :]
             lbl_true = target.data.cpu().numpy()
             acc, acc_cls, mean_iu, fwavacc, iu = utils.label_accuracy_score(lbl_true, lbl_pred, n_class=n_class,
                                                                             ignore=self.ignore)
@@ -287,6 +338,8 @@ class Trainer(object):
             # logging to tensorboard
             self.best_train_meanIoU = max(self.best_train_meanIoU, metrics[2])
             info = OrderedDict({
+                "loss_seg": loss_seg.data[0],
+                "loss_gram": loss_gram.data[0],
                 "loss": loss.data[0],
                 "acc": metrics[0],
                 "acc_cls": metrics[1],

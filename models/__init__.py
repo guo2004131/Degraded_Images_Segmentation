@@ -5,4 +5,5 @@ from .fcn8s import FCN8s
 from .fcn8s import FCN8sAtOnce
 from .vgg import VGG16
 
+from fcn8s_densegram import FCN8sDenseGram
 from fcn8s_densegram import FCN8sAtOnceDenseGram

@@ -3,12 +3,12 @@
 import torch
 import models
 import numpy as np
+import torch.nn as nn
 import torch.nn.functional as F
 from distutils.version import LooseVersion
 
 
 def get_parameters(model, bias=False):
-    import torch.nn as nn
     modules_skipped = (
         nn.ReLU,
         nn.MaxPool2d,
@@ -17,6 +17,7 @@ def get_parameters(model, bias=False):
         models.FCN32s,
         models.FCN16s,
         models.FCN8s,
+        models.FCN8sDenseGram,
     )
     for m in model.modules():
         if isinstance(m, nn.Conv2d):
