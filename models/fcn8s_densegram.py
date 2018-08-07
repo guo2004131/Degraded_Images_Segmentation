@@ -61,21 +61,11 @@ class FCN8sDenseGram(nn.Module):
         self.relu2_2 = nn.ReLU(inplace=True)
         self.pool2 = nn.MaxPool2d(2, stride=2, ceil_mode=True)  # 1/4
 
-        # self.conv2_1_b = nn.Conv2d(128, self.grow_rate, 1)
-        self.relu_2_1_b = nn.ReLU(inplace=True)
-        # self.conv2_2_b = nn.Conv2d(128 + self.grow_rate, self.grow_rate, 1)
-        self.relu_2_2_b = nn.ReLU(inplace=True)
-
         self.conv2_1_ = nn.Conv2d(64, 128, 3, padding=1)
         self.relu2_1_ = nn.ReLU(inplace=True)
         self.conv2_2_ = nn.Conv2d(128, 128, 3, padding=1)
         self.relu2_2_ = nn.ReLU(inplace=True)
         self.pool2_ = nn.MaxPool2d(2, stride=2, ceil_mode=True)  # 1/4
-
-        # self.conv2_1_b_ = nn.Conv2d(128, self.grow_rate, 1)
-        self.relu_2_1_b_ = nn.ReLU(inplace=True)
-        # self.conv2_2_b_ = nn.Conv2d(128+self.grow_rate, self.grow_rate, 1)
-        self.relu_2_2_b_ = nn.ReLU(inplace=True)
 
         # conv3 & conv3_
         self.conv3_1 = nn.Conv2d(128, 256, 3, padding=1)
@@ -86,13 +76,6 @@ class FCN8sDenseGram(nn.Module):
         self.relu3_3 = nn.ReLU(inplace=True)
         self.pool3 = nn.MaxPool2d(2, stride=2, ceil_mode=True)  # 1/8
 
-        # self.conv3_1_b = nn.Conv2d(256, self.grow_rate, 1)
-        self.relu3_1_b = nn.ReLU(inplace=True)
-        # self.conv3_2_b = nn.Conv2d(256+self.grow_rate, self.grow_rate, 1)
-        self.relu3_2_b = nn.ReLU(inplace=True)
-        # self.conv3_3_b = nn.Conv2d(256+2*self.grow_rate, self.grow_rate, 1)
-        self.relu3_3_b = nn.ReLU(inplace=True)
-
         self.conv3_1_ = nn.Conv2d(128, 256, 3, padding=1)
         self.relu3_1_ = nn.ReLU(inplace=True)
         self.conv3_2_ = nn.Conv2d(256, 256, 3, padding=1)
@@ -100,13 +83,6 @@ class FCN8sDenseGram(nn.Module):
         self.conv3_3_ = nn.Conv2d(256, 256, 3, padding=1)
         self.relu3_3_ = nn.ReLU(inplace=True)
         self.pool3_ = nn.MaxPool2d(2, stride=2, ceil_mode=True)  # 1/8
-
-        # self.conv3_1_b_ = nn.Conv2d(256, self.grow_rate, 1)
-        self.relu3_1_b_ = nn.ReLU(inplace=True)
-        # self.conv3_2_b_ = nn.Conv2d(256+self.grow_rate, self.grow_rate, 1)
-        self.relu3_2_b_ = nn.ReLU(inplace=True)
-        # self.conv3_3_b_ = nn.Conv2d(256+2*self.grow_rate, self.grow_rate, 1)
-        self.relu3_3_b_ = nn.ReLU(inplace=True)
 
         # conv4 & conv4_
         self.conv4_1 = nn.Conv2d(256, 512, 3, padding=1)
@@ -117,13 +93,6 @@ class FCN8sDenseGram(nn.Module):
         self.relu4_3 = nn.ReLU(inplace=True)
         self.pool4 = nn.MaxPool2d(2, stride=2, ceil_mode=True)  # 1/16
 
-        # self.conv4_1_b = nn.Conv2d(512, self.grow_rate, 1)
-        self.relu4_1_b = nn.ReLU(inplace=True)
-        # self.conv4_2_b = nn.Conv2d(512+self.grow_rate, self.grow_rate, 1)
-        self.relu4_2_b = nn.ReLU(inplace=True)
-        # self.conv4_3_b = nn.Conv2d(512+2*self.grow_rate, self.grow_rate, 1)
-        self.relu4_3_b = nn.ReLU(inplace=True)
-
         self.conv4_1_ = nn.Conv2d(256, 512, 3, padding=1)
         self.relu4_1_ = nn.ReLU(inplace=True)
         self.conv4_2_ = nn.Conv2d(512, 512, 3, padding=1)
@@ -131,13 +100,6 @@ class FCN8sDenseGram(nn.Module):
         self.conv4_3_ = nn.Conv2d(512, 512, 3, padding=1)
         self.relu4_3_ = nn.ReLU(inplace=True)
         self.pool4_ = nn.MaxPool2d(2, stride=2, ceil_mode=True)  # 1/16
-
-        # self.conv4_1_b_ = nn.Conv2d(512, self.grow_rate, 1)
-        self.relu4_1_b_ = nn.ReLU(inplace=True)
-        # self.conv4_2_b_ = nn.Conv2d(512+self.grow_rate, self.grow_rate, 1)
-        self.relu4_2_b_ = nn.ReLU(inplace=True)
-        # self.conv4_3_b_ = nn.Conv2d(512+2*self.grow_rate, self.grow_rate, 1)
-        self.relu4_3_b_ = nn.ReLU(inplace=True)
 
         # conv5 & conv5_
         self.conv5_1 = nn.Conv2d(512, 512, 3, padding=1)
@@ -148,13 +110,6 @@ class FCN8sDenseGram(nn.Module):
         self.relu5_3 = nn.ReLU(inplace=True)
         self.pool5 = nn.MaxPool2d(2, stride=2, ceil_mode=True)  # 1/32
 
-        # self.conv5_1_b = nn.Conv2d(512, self.grow_rate, 1)
-        self.relu5_1_b = nn.ReLU(inplace=True)
-        # self.conv5_2_b = nn.Conv2d(512+self.grow_rate, self.grow_rate, 1)
-        self.relu5_2_b = nn.ReLU(inplace=True)
-        # self.conv5_3_b = nn.Conv2d(512+2*self.grow_rate, self.grow_rate, 1)
-        self.relu5_3_b = nn.ReLU(inplace=True)
-
         self.conv5_1_ = nn.Conv2d(512, 512, 3, padding=1)
         self.relu5_1_ = nn.ReLU(inplace=True)
         self.conv5_2_ = nn.Conv2d(512, 512, 3, padding=1)
@@ -163,38 +118,23 @@ class FCN8sDenseGram(nn.Module):
         self.relu5_3_ = nn.ReLU(inplace=True)
         self.pool5_ = nn.MaxPool2d(2, stride=2, ceil_mode=True)  # 1/32
 
-        # self.conv5_1_b_ = nn.Conv2d(512, self.grow_rate, 1)
-        self.relu5_1_b_ = nn.ReLU(inplace=True)
-        # self.conv5_2_b_ = nn.Conv2d(512+self.grow_rate, self.grow_rate, 1)
-        self.relu5_2_b_ = nn.ReLU(inplace=True)
-        # self.conv5_3_b_ = nn.Conv2d(512+2*self.grow_rate, self.grow_rate, 1)
-        self.relu5_3_b_ = nn.ReLU(inplace=True)
-
         # fc6 & fc6_
         self.fc6 = nn.Conv2d(512, 4096, 7)
         self.relu6 = nn.ReLU(inplace=True)
         self.drop6 = nn.Dropout2d()
-        # self.fc6_b = nn.Conv2d(4096, self.grow_rate, 1)
-        self.relu6_b = nn.ReLU(inplace=True)
 
         self.fc6_ = nn.Conv2d(512, 4096, 7)
         self.relu6_ = nn.ReLU(inplace=True)
         self.drop6_ = nn.Dropout2d()
-        # self.fc6_b_ = nn.Conv2d(4096, self.grow_rate, 1)
-        self.relu6_b_ = nn.ReLU(inplace=True)
 
         # fc7 & fc7_
         self.fc7 = nn.Conv2d(4096, 4096, 1)
         self.relu7 = nn.ReLU(inplace=True)
         self.drop7 = nn.Dropout2d()
-        # self.fc7_b = nn.Conv2d(4096, self.grow_rate, 1)
-        self.relu7_b = nn.ReLU(inplace=True)
 
         self.fc7_ = nn.Conv2d(4096, 4096, 1)
         self.relu7_ = nn.ReLU(inplace=True)
         self.drop7_ = nn.Dropout2d()
-        # self.fc7_b_ = nn.Conv2d(4096, self.grow_rate, 1)
-        self.relu7_b_ = nn.ReLU(inplace=True)
 
         # transposed conv
         self.score_fr = nn.Conv2d(4096, n_class, 1)
@@ -219,8 +159,8 @@ class FCN8sDenseGram(nn.Module):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 # torch.nn.init.xavier_normal_(m.weight)
-                torch.nn.init.constant_(m.weight, 1)  # Due to the random dropout, the last output is different
-                # m.weight.data.zero_()
+                # torch.nn.init.constant_(m.weight, 1)  # Due to the random dropout, the last output is different
+                m.weight.data.zero_()
                 if m.bias is not None:
                     m.bias.data.zero_()
             if isinstance(m, nn.ConvTranspose2d):
@@ -242,88 +182,88 @@ class FCN8sDenseGram(nn.Module):
 
         # conv2 h
         h = self.relu2_1(self.conv2_1(h))
-        f_2_1 = self.relu_2_1_b(self.conv2_1_b(h))
+        f_2_1 = h
         h = self.relu2_2(self.conv2_2(h))
-        f_2_2 = self.relu_2_2_b(self.conv2_2_b(torch.cat([h, f_2_1], 1)))
+        f_2_2 = torch.cat([h, f_2_1], 1)
         h = self.pool2(h)
         # conv2 h_
         h_ = self.relu2_1_(self.conv2_1_(h_))
-        f_2_1_ = self.relu_2_1_b_(self.conv2_1_b_(h_))
+        f_2_1_ = h_
         h_ = self.relu2_2_(self.conv2_2_(h_))
-        f_2_2_ = self.relu_2_2_b_(self.conv2_2_b_(torch.cat([h_, f_2_1_], 1)))
+        f_2_2_ = torch.cat([h_, f_2_1_], 1)
         h_ = self.pool2_(h_)
 
         # conv3 h
         h = self.relu3_1(self.conv3_1(h))
-        f_3_1 = self.relu3_1_b(self.conv3_1_b(h))
+        f_3_1 = h
         h = self.relu3_2(self.conv3_2(h))
-        f_3_2 = self.relu3_2_b(self.conv3_2_b(torch.cat([h, f_3_1], 1)))
+        f_3_2 = torch.cat([h, f_3_1], 1)
         h = self.relu3_3(self.conv3_3(h))
-        f_3_3 = self.relu3_3_b(self.conv3_3_b(torch.cat([h, f_3_1, f_3_2], 1)))
+        f_3_3 = torch.cat([h, f_3_1, f_3_2], 1)
         h = self.pool3(h)
         pool3 = h  # 1/8
         # conv3 h_
         h_ = self.relu3_1_(self.conv3_1_(h_))
-        f_3_1_ = self.relu3_1_b_(self.conv3_1_b_(h_))
+        f_3_1_ = h_
         h_ = self.relu3_2_(self.conv3_2_(h_))
-        f_3_2_ = self.relu3_2_b_(self.conv3_2_b_(torch.cat([h_, f_3_1_], 1)))
+        f_3_2_ = torch.cat([h_, f_3_1_], 1)
         h_ = self.relu3_3_(self.conv3_3_(h_))
-        f_3_3_ = self.relu3_3_b_(self.conv3_3_b_(torch.cat([h_, f_3_1_, f_3_2_], 1)))
+        f_3_3_ = torch.cat([h_, f_3_1_, f_3_2_], 1)
         h_ = self.pool3_(h_)
         pool3_ = h_  # 1/8
 
         # conv4 h
         h = self.relu4_1(self.conv4_1(h))
-        f_4_1 = self.relu4_1_b(self.conv4_1_b(h))
+        f_4_1 = h
         h = self.relu4_2(self.conv4_2(h))
-        f_4_2 = self.relu4_2_b(self.conv4_2_b(torch.cat([h, f_4_1], 1)))
+        f_4_2 = torch.cat([h, f_4_1], 1)
         h = self.relu4_3(self.conv4_3(h))
-        f_4_3 = self.relu4_3_b(self.conv4_3_b(torch.cat([h, f_4_1, f_4_2], 1)))
+        f_4_3 = torch.cat([h, f_4_1, f_4_2], 1)
         h = self.pool4(h)
         pool4 = h  # 1/16
         # conv4 h_
         h_ = self.relu4_1_(self.conv4_1_(h_))
-        f_4_1_ = self.relu4_1_b_(self.conv4_1_b_(h_))
+        f_4_1_ = h_
         h_ = self.relu4_2_(self.conv4_2_(h_))
-        f_4_2_ = self.relu4_2_b_(self.conv4_2_b_(torch.cat([h_, f_4_1_], 1)))
+        f_4_2_ = torch.cat([h_, f_4_1_], 1)
         h_ = self.relu4_3_(self.conv4_3_(h_))
-        f_4_3_ = self.relu4_3_b_(self.conv4_3_b_(torch.cat([h_, f_4_1_, f_4_2_], 1)))
+        f_4_3_ = torch.cat([h_, f_4_1_, f_4_2_], 1)
         h_ = self.pool4_(h_)
         pool4_ = h_  # 1/16
 
         # conv5 h
         h = self.relu5_1(self.conv5_1(h))
-        f_5_1 = self.relu5_1_b(self.conv5_1_b(h))
+        f_5_1 = h
         h = self.relu5_2(self.conv5_2(h))
-        f_5_2 = self.relu5_2_b(self.conv5_2_b(torch.cat([h, f_5_1], 1)))
+        f_5_2 = torch.cat([h, f_5_1], 1)
         h = self.relu5_3(self.conv5_3(h))
-        f_5_3 = self.relu5_3_b(self.conv5_3_b(torch.cat([h, f_5_1, f_5_2], 1)))
+        f_5_3 = torch.cat([h, f_5_1, f_5_2], 1)
         h = self.pool5(h)
         # conv5 h_
         h_ = self.relu5_1_(self.conv5_1_(h_))
-        f_5_1_ = self.relu5_1_b_(self.conv5_1_b_(h_))
+        f_5_1_ = h_
         h_ = self.relu5_2_(self.conv5_2_(h_))
-        f_5_2_ = self.relu5_2_b_(self.conv5_2_b_(torch.cat([h_, f_5_1_], 1)))
+        f_5_2_ = torch.cat([h_, f_5_1_], 1)
         h_ = self.relu5_3_(self.conv5_3_(h_))
-        f_5_3_ = self.relu5_3_b_(self.conv5_3_b_(torch.cat([h_, f_5_1_, f_5_2_], 1)))
+        f_5_3_ = torch.cat([h_, f_5_1_, f_5_2_], 1)
         h_ = self.pool5_(h_)
 
         # fc6 h
         h = self.relu6(self.fc6(h))
-        f_6 = self.relu6_b(self.fc6_b(h))
+        f_6 = h
         h = self.drop6(h)
         # fc6 h_
         h_ = self.relu6_(self.fc6_(h_))
-        f_6_ = self.relu6_b_(self.fc6_b_(h_))
+        f_6_ = h_
         h_ = self.drop6_(h_)
 
         # fc7 h
         h = self.relu7(self.fc7(h))
-        f_7 = self.relu7_b(self.fc7_b(h))
+        f_7 = h
         h = self.drop7(h)
         # fc7 h_
         h_ = self.relu7_(self.fc7_(h_))
-        f_7_ = self.relu7_b_(self.fc7_b_(h_))
+        f_7_ = h_
         h_ = self.drop7_(h_)
 
         # upscore2 h
@@ -436,88 +376,88 @@ class FCN8sAtOnceDenseGram(FCN8sDenseGram):
 
         # conv2 h
         h = self.relu2_1(self.conv2_1(h))
-        f_2_1 = self.relu_2_1_b(h)
+        f_2_1 = h
         h = self.relu2_2(self.conv2_2(h))
-        f_2_2 = self.relu_2_2_b(torch.cat([h, f_2_1], 1))
+        f_2_2 = torch.cat([h, f_2_1], 1)
         h = self.pool2(h)
         # conv2 h_
         h_ = self.relu2_1_(self.conv2_1_(h_))
-        f_2_1_ = self.relu_2_1_b_(h_)
+        f_2_1_ = h_
         h_ = self.relu2_2_(self.conv2_2_(h_))
-        f_2_2_ = self.relu_2_2_b_(torch.cat([h_, f_2_1_], 1))
+        f_2_2_ = torch.cat([h_, f_2_1_], 1)
         h_ = self.pool2_(h_)
 
         # conv3 h
         h = self.relu3_1(self.conv3_1(h))
-        f_3_1 = self.relu3_1_b(h)
+        f_3_1 = h
         h = self.relu3_2(self.conv3_2(h))
-        f_3_2 = self.relu3_2_b(torch.cat([h, f_3_1], 1))
+        f_3_2 = torch.cat([h, f_3_1], 1)
         h = self.relu3_3(self.conv3_3(h))
-        f_3_3 = self.relu3_3_b(torch.cat([h, f_3_1, f_3_2], 1))
+        f_3_3 = torch.cat([h, f_3_1, f_3_2], 1)
         h = self.pool3(h)
         pool3 = h  # 1/8
         # conv3 h_
         h_ = self.relu3_1_(self.conv3_1_(h_))
-        f_3_1_ = self.relu3_1_b_(h_)
+        f_3_1_ = h_
         h_ = self.relu3_2_(self.conv3_2_(h_))
-        f_3_2_ = self.relu3_2_b_(torch.cat([h_, f_3_1_], 1))
+        f_3_2_ = torch.cat([h_, f_3_1_], 1)
         h_ = self.relu3_3_(self.conv3_3_(h_))
-        f_3_3_ = self.relu3_3_b_(torch.cat([h_, f_3_1_, f_3_2_], 1))
+        f_3_3_ = torch.cat([h_, f_3_1_, f_3_2_], 1)
         h_ = self.pool3_(h_)
         pool3_ = h_  # 1/8
 
         # conv4 h
         h = self.relu4_1(self.conv4_1(h))
-        f_4_1 = self.relu4_1_b(h)
+        f_4_1 = h
         h = self.relu4_2(self.conv4_2(h))
-        f_4_2 = self.relu4_2_b(torch.cat([h, f_4_1], 1))
+        f_4_2 = torch.cat([h, f_4_1], 1)
         h = self.relu4_3(self.conv4_3(h))
-        f_4_3 = self.relu4_3_b(torch.cat([h, f_4_1, f_4_2], 1))
+        f_4_3 = torch.cat([h, f_4_1, f_4_2], 1)
         h = self.pool4(h)
         pool4 = h  # 1/16
         # conv4 h_
         h_ = self.relu4_1_(self.conv4_1_(h_))
-        f_4_1_ = self.relu4_1_b_(h_)
+        f_4_1_ = h_
         h_ = self.relu4_2_(self.conv4_2_(h_))
-        f_4_2_ = self.relu4_2_b_(torch.cat([h_, f_4_1_], 1))
+        f_4_2_ = torch.cat([h_, f_4_1_], 1)
         h_ = self.relu4_3_(self.conv4_3_(h_))
-        f_4_3_ = self.relu4_3_b_(torch.cat([h_, f_4_1_, f_4_2_], 1))
+        f_4_3_ = torch.cat([h_, f_4_1_, f_4_2_], 1)
         h_ = self.pool4_(h_)
         pool4_ = h_  # 1/16
 
         # conv5 h
         h = self.relu5_1(self.conv5_1(h))
-        f_5_1 = self.relu5_1_b(h)
+        f_5_1 = h
         h = self.relu5_2(self.conv5_2(h))
-        f_5_2 = self.relu5_2_b(torch.cat([h, f_5_1], 1))
+        f_5_2 = torch.cat([h, f_5_1], 1)
         h = self.relu5_3(self.conv5_3(h))
-        f_5_3 = self.relu5_3_b(torch.cat([h, f_5_1, f_5_2], 1))
+        f_5_3 = torch.cat([h, f_5_1, f_5_2], 1)
         h = self.pool5(h)
         # conv5 h_
         h_ = self.relu5_1_(self.conv5_1_(h_))
-        f_5_1_ = self.relu5_1_b_(h_)
+        f_5_1_ = h_
         h_ = self.relu5_2_(self.conv5_2_(h_))
-        f_5_2_ = self.relu5_2_b_(torch.cat([h_, f_5_1_], 1))
+        f_5_2_ = torch.cat([h_, f_5_1_], 1)
         h_ = self.relu5_3_(self.conv5_3_(h_))
-        f_5_3_ = self.relu5_3_b_(torch.cat([h_, f_5_1_, f_5_2_], 1))
+        f_5_3_ = torch.cat([h_, f_5_1_, f_5_2_], 1)
         h_ = self.pool5_(h_)
 
         # fc6 h
         h = self.relu6(self.fc6(h))
-        f_6 = self.relu6_b(h)
+        f_6 = h
         h = self.drop6(h)
         # fc6 h_
         h_ = self.relu6_(self.fc6_(h_))
-        f_6_ = self.relu6_b_(h_)
+        f_6_ = h_
         h_ = self.drop6_(h_)
 
         # fc7 h
         h = self.relu7(self.fc7(h))
-        f_7 = self.relu7_b(h)
+        f_7 = h
         h = self.drop7(h)
         # fc7 h_
         h_ = self.relu7_(self.fc7_(h_))
-        f_7_ = self.relu7_b_(h_)
+        f_7_ = h_
         h_ = self.drop7_(h_)
 
         # upscore2 h
@@ -803,7 +743,7 @@ class FCN8sAtOnceDenseGram(FCN8sDenseGram):
 
     def freeze_params(self, t, s):
         """
-        freeze network paramters
+        freeze network parameters
         :param t: freeze teacher network parameters 0; update teacher network parameters (NOT 0)
         :param s: freeze student network parameters 0; update student network parameters (NOT 0)
         :return: N/A
