@@ -7,7 +7,7 @@ import torchfcn
 import datasets
 import argparse
 import os.path as osp
-from network_trainer_densegram import TrainerDG
+from network_trainer_densegram_singleinput import Trainer
 
 
 configurations = {
@@ -26,7 +26,7 @@ configurations = {
 def main():
     # 0. input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=1)
+    parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=0)
     parser.add_argument('-b', '--batch', type=int, help='batch size', default=1)
     parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='CamVid')
     parser.add_argument('-dp', '--datasetpth', help='dataset root pth', default='/home/dg/Dropbox/Datasets')
@@ -60,19 +60,19 @@ def main():
     root = osp.expanduser(osp.join(dataset_pth, dataset))
     kwargs = {'num_workers': 4, 'pin_memory': True} if cuda else {}
     if dataset == 'VOC':
-        train_data = datasets.VOCSegDG(root, split='train', dataset=degradation, transform=True)
-        val_data = datasets.VOCSegDG(root, split='val', dataset=degradation, transform=True)
-        test_data = datasets.VOCSegDG(root, split='test', dataset=degradation, transform=True)
+        train_data = datasets.VOCSeg(root, split='train', dataset=degradation, transform=True)
+        val_data = datasets.VOCSeg(root, split='val', dataset=degradation, transform=True)
+        test_data = datasets.VOCSeg(root, split='test', dataset=degradation, transform=True)
         model_filename = osp.join(modelpth, 'VOC_fcn8satonce.pth.tar')
     elif dataset == "CamVid":
-        train_data = datasets.CamVidSegDG(root, split='train', dataset=degradation, transform=True)
-        val_data = datasets.CamVidSegDG(root, split='val', dataset=degradation, transform=True)
-        test_data = datasets.CamVidSegDG(root, split='test', dataset=degradation, transform=True)
+        train_data = datasets.CamVidSeg(root, split='train', dataset=degradation, transform=True)
+        val_data = datasets.CamVidSeg(root, split='val', dataset=degradation, transform=True)
+        test_data = datasets.CamVidSeg(root, split='test', dataset=degradation, transform=True)
         model_filename = osp.join(modelpth, 'CamVid_fcn8satonce.pth.tar')
     else:
-        train_data = datasets.SUNSegDG(root, split='train', dataset=degradation, transform=True)
-        val_data = datasets.SUNSegDG(root, split='val', dataset=degradation, transform=True)
-        test_data = datasets.SUNSegDG(root, split='test', dataset=degradation, transform=True)
+        train_data = datasets.SUNSeg(root, split='train', dataset=degradation, transform=True)
+        val_data = datasets.SUNSeg(root, split='val', dataset=degradation, transform=True)
+        test_data = datasets.SUNSeg(root, split='test', dataset=degradation, transform=True)
         model_filename = osp.join(modelpth, 'SUNRGBD_fcn8satonce.pth.tar')
 
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch, shuffle=True, **kwargs)
@@ -100,20 +100,34 @@ def main():
     model = model.to(device)
 
     # 3. optimizer
-    optim = torch.optim.SGD(
-        [
-            {'params': utils.get_parameters(model, bias=False)},
-            {'params': utils.get_parameters(model, bias=True),
-             'lr': cfg['lr'] * 2, 'weight_decay': 0},
-        ],
-        lr=cfg['lr'],
-        momentum=cfg['momentum'],
-        weight_decay=cfg['weight_decay'])
+    is_sgd = True
+    if is_sgd:
+        # SGD
+        optim = torch.optim.SGD(
+            [
+                {'params': utils.get_parameters(model, bias=False)},
+                {'params': utils.get_parameters(model, bias=True),
+                 'lr': cfg['lr'] * 2, 'weight_decay': 0},
+            ],
+            lr=cfg['lr'],
+            momentum=cfg['momentum'],
+            weight_decay=cfg['weight_decay'])
+    else:
+        # Adam
+        optim = torch.optim.Adam(
+            [
+                {'params': utils.get_parameters(model, bias=False)},
+                {'params': utils.get_parameters(model, bias=True),
+                 'lr': cfg['lr'] * 2, 'weight_decay': 0},
+            ],
+            lr=cfg['lr'],
+            weight_decay=cfg['weight_decay'])
+
     if resume:
         optim.load_state_dict(checkpoint['optim_state_dict'])
 
     # 4. trainer
-    trainer = TrainerDG(
+    trainer = Trainer(
         cuda=cuda,
         model=model,
         optimizer=optim,
