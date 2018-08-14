@@ -110,8 +110,31 @@ class SUNSeg(data.Dataset):
         self.datasets['o'] = osp.join(self.root, 'Original_Images')
         self.datasets['bg1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_1')
         self.datasets['bm1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_1')
-        self.datasets['hi1'] = osp.join(self.root, 'Degraded_Images', 'Haze_I', 'degraded_parameter_1')
-        self.datasets['ho1'] = osp.join(self.root, 'Degraded_Images', 'Haze_O', 'degraded_parameter_1')
+        # haze
+        self.datasets['h0.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_0.5')
+        self.datasets['h1.0'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1.0')
+        self.datasets['h1.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1.5')
+        self.datasets['h2.0'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_2.0')
+        self.datasets['h2.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_2.5')
+        self.datasets['h3.0'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_3.0')
+        self.datasets['h3.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_3.5')
+
+        self.datasets['rhcap0.5'] = osp.join(self.root, 'Restored_Images', 'Haze_CAP', 'degraded_parameter_0.5')
+        self.datasets['rhcap1.0'] = osp.join(self.root, 'Restored_Images', 'Haze_CAP', 'degraded_parameter_1.0')
+        self.datasets['rhcap1.5'] = osp.join(self.root, 'Restored_Images', 'Haze_CAP', 'degraded_parameter_1.5')
+        self.datasets['rhcap2.0'] = osp.join(self.root, 'Restored_Images', 'Haze_CAP', 'degraded_parameter_2.0')
+        self.datasets['rhcap2.5'] = osp.join(self.root, 'Restored_Images', 'Haze_CAP', 'degraded_parameter_2.5')
+        self.datasets['rhcap3.0'] = osp.join(self.root, 'Restored_Images', 'Haze_CAP', 'degraded_parameter_3.0')
+        self.datasets['rhcap3.5'] = osp.join(self.root, 'Restored_Images', 'Haze_CAP', 'degraded_parameter_3.5')
+
+        self.datasets['rhdn0.5'] = osp.join(self.root, 'Restored_Images', 'Haze_DehazeNet', 'degraded_parameter_0.5')
+        self.datasets['rhdn1.0'] = osp.join(self.root, 'Restored_Images', 'Haze_DehazeNet', 'degraded_parameter_1.0')
+        self.datasets['rhdn1.5'] = osp.join(self.root, 'Restored_Images', 'Haze_DehazeNet', 'degraded_parameter_1.5')
+        self.datasets['rhdn2.0'] = osp.join(self.root, 'Restored_Images', 'Haze_DehazeNet', 'degraded_parameter_2.0')
+        self.datasets['rhdn2.5'] = osp.join(self.root, 'Restored_Images', 'Haze_DehazeNet', 'degraded_parameter_2.5')
+        self.datasets['rhdn3.0'] = osp.join(self.root, 'Restored_Images', 'Haze_DehazeNet', 'degraded_parameter_3.0')
+        self.datasets['rhdn3.5'] = osp.join(self.root, 'Restored_Images', 'Haze_DehazeNet', 'degraded_parameter_3.5')
+
         self.datasets['ns1'] = osp.join(self.root, 'Degraded_Images', 'Noise_Speckle', 'degraded_parameter_1')
         self.datasets['nsp1'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_1')
 
