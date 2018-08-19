@@ -6,6 +6,7 @@ dist/
 image_gt_preprocessing/
 *_teaser/
 matlab_image_processing/
+Tensorboard_logs/
 *.egg-info/
 *.npy
 *.pyc
