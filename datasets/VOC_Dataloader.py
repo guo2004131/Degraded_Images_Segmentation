@@ -79,12 +79,26 @@ class VOCSeg(data.Dataset):
         self.datasets['bg3'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_3')
         self.datasets['bg4'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_4')
         self.datasets['bg5'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_5')
+
+        self.datasets['rbg1'] = osp.join(self.root, 'Restored_Images', 'Blur_Gaussian', 'degraded_parameter_1')
+        self.datasets['rbg2'] = osp.join(self.root, 'Restored_Images', 'Blur_Gaussian', 'degraded_parameter_2')
+        self.datasets['rbg3'] = osp.join(self.root, 'Restored_Images', 'Blur_Gaussian', 'degraded_parameter_3')
+        self.datasets['rbg4'] = osp.join(self.root, 'Restored_Images', 'Blur_Gaussian', 'degraded_parameter_4')
+        self.datasets['rbg5'] = osp.join(self.root, 'Restored_Images', 'Blur_Gaussian', 'degraded_parameter_5')
+
         # motion blur
         self.datasets['bm5'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_5')
         self.datasets['bm10'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_10')
         self.datasets['bm15'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_15')
         self.datasets['bm20'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_20')
         self.datasets['bm25'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_25')
+
+        self.datasets['rbm5'] = osp.join(self.root, 'Restored_Images', 'Blur_Motion', 'degraded_parameter_5')
+        self.datasets['rbm10'] = osp.join(self.root, 'Restored_Images', 'Blur_Motion', 'degraded_parameter_10')
+        self.datasets['rbm15'] = osp.join(self.root, 'Restored_Images', 'Blur_Motion', 'degraded_parameter_15')
+        self.datasets['rbm20'] = osp.join(self.root, 'Restored_Images', 'Blur_Motion', 'degraded_parameter_20')
+        self.datasets['rbm25'] = osp.join(self.root, 'Restored_Images', 'Blur_Motion', 'degraded_parameter_25')
+
         # haze
         self.datasets['h0.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_0.5')
         self.datasets['h1.0'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1.0')
@@ -113,11 +127,27 @@ class VOCSeg(data.Dataset):
         # noise
         self.datasets['ns0.02'] = osp.join(self.root, 'Degraded_Images', 'Noise_Speckle', 'degraded_parameter_0.02')
         # salt & pepper noise
-        self.datasets['nsp0.02'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.02')
-        self.datasets['nsp0.04'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.04')
-        self.datasets['nsp0.06'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.06')
-        self.datasets['nsp0.08'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.08')
-        self.datasets['nsp0.10'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.10')
+        self.datasets['nsp0.02'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper',
+                                            'degraded_parameter_0.02')
+        self.datasets['nsp0.04'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper',
+                                            'degraded_parameter_0.04')
+        self.datasets['nsp0.06'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper',
+                                            'degraded_parameter_0.06')
+        self.datasets['nsp0.08'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper',
+                                            'degraded_parameter_0.08')
+        self.datasets['nsp0.10'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper',
+                                            'degraded_parameter_0.10')
+
+        self.datasets['rnsp0.02'] = osp.join(self.root, 'Restored_Images', 'Noise_Salt_Pepper_MedianFilter',
+                                             'degraded_parameter_0.02')
+        self.datasets['rnsp0.04'] = osp.join(self.root, 'Restored_Images', 'Noise_Salt_Pepper_MedianFilter',
+                                             'degraded_parameter_0.04')
+        self.datasets['rnsp0.06'] = osp.join(self.root, 'Restored_Images', 'Noise_Salt_Pepper_MedianFilter',
+                                             'degraded_parameter_0.06')
+        self.datasets['rnsp0.08'] = osp.join(self.root, 'Restored_Images', 'Noise_Salt_Pepper_MedianFilter',
+                                             'degraded_parameter_0.08')
+        self.datasets['rnsp0.10'] = osp.join(self.root, 'Restored_Images', 'Noise_Salt_Pepper_MedianFilter',
+                                             'degraded_parameter_0.10')
 
         img_dataset_dir = osp.join(self.root, self.datasets[dataset])
 

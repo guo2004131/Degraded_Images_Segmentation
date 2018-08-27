@@ -9,11 +9,11 @@ from network_tester import Tester
 def main():
     # 0. input arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model', help='Checkpoint path')
+    parser.add_argument('-m', '--model', help='Checkpoint path', default='')
     parser.add_argument('-g', '--gpu', type=int, help='GPU device to use', default=0)
-    parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='VOC')
+    parser.add_argument('-d', '--dataset', help='VOC, CamVid, SUNRGBD', default='SUNRGBD')
     parser.add_argument('-dr', '--datasetroot', help='dataset root pth', default='/home/dg/Dropbox/Datasets')
-    parser.add_argument('-ds', '--degradedtest', help='o, bg, bm, hi, ho, ns, nsp', default='o')
+    parser.add_argument('-ds', '--degradedtest', help='o, bg, bm, hi, ho, ns, nsp', default='rnsp0.10')
     args = parser.parse_args()
 
     test_model = args.model
