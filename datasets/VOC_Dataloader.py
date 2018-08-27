@@ -73,18 +73,18 @@ class VOCSeg(data.Dataset):
         self.n_classes = 21
 
         self.datasets['o'] = osp.join(self.root, 'Original_Images')
-
+        # Gaussian blur
         self.datasets['bg1'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_1')
         self.datasets['bg2'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_2')
         self.datasets['bg3'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_3')
         self.datasets['bg4'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_4')
         self.datasets['bg5'] = osp.join(self.root, 'Degraded_Images', 'Blur_Gaussian', 'degraded_parameter_5')
-
+        # motion blur
+        self.datasets['bm5'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_5')
         self.datasets['bm10'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_10')
+        self.datasets['bm15'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_15')
         self.datasets['bm20'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_20')
-        self.datasets['hi1'] = osp.join(self.root, 'Degraded_Images', 'Haze_I', 'degraded_parameter_1')
-        self.datasets['ho1'] = osp.join(self.root, 'Degraded_Images', 'Haze_O', 'degraded_parameter_1')
-
+        self.datasets['bm25'] = osp.join(self.root, 'Degraded_Images', 'Blur_Motion', 'degraded_parameter_25')
         # haze
         self.datasets['h0.5'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_0.5')
         self.datasets['h1.0'] = osp.join(self.root, 'Degraded_Images', 'Haze', 'degraded_parameter_1.0')
@@ -112,7 +112,12 @@ class VOCSeg(data.Dataset):
 
         # noise
         self.datasets['ns0.02'] = osp.join(self.root, 'Degraded_Images', 'Noise_Speckle', 'degraded_parameter_0.02')
+        # salt & pepper noise
         self.datasets['nsp0.02'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.02')
+        self.datasets['nsp0.04'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.04')
+        self.datasets['nsp0.06'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.06')
+        self.datasets['nsp0.08'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.08')
+        self.datasets['nsp0.10'] = osp.join(self.root, 'Degraded_Images', 'Noise_Salt_Pepper', 'degraded_parameter_0.10')
 
         img_dataset_dir = osp.join(self.root, self.datasets[dataset])
 
@@ -182,6 +187,8 @@ class VOCSeg(data.Dataset):
         img = img[:, :, ::-1]
         # convert to color images
         # lbl = self.label_to_color_image(lbl)
+        if type(lbl) is not np.ndarray:
+            lbl = np.array(lbl)
         lbl[lbl == 255] = -1
         lbl = lbl.astype(np.int8)
         return img, lbl
@@ -210,10 +217,18 @@ class VOCSeg(data.Dataset):
 if __name__ == "__main__":
     root = '/home/dg/Dropbox/Datasets/VOC'
     dataset = VOCSeg(root, split='test', dataset='bg2', transform=True)
-    img, lbl = dataset.__getitem__(1)
+    img, lbl = dataset.__getitem__(52)
     img, lbl = dataset.untransform(img, lbl)
     plt.subplot(211)
     plt.imshow(img)
     plt.subplot(212)
     plt.imshow(lbl)
     plt.show()
+
+    a = PIL.Image.open('/home/dg/Dropbox/Datasets/VOC/VOC_test_gt/2007_001586.png')
+    a = np.array(a)
+    a = label2rgb(a)
+    plt.imshow(a)
+    plt.show()
+    im = PIL.Image.fromarray(a)
+    im.save(osp.join('/home/dg/Dropbox/Projects/AAAI_19_2/Figures', '2007_001586_lbl.png'))
