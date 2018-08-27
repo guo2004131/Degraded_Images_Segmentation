@@ -89,6 +89,6 @@ class Tester(object):
         test_loss /= len(self.test_loader)
 
         with open(osp.join(self.out, 'log.csv'), 'a') as f:
-            log = [test_loss] + list(metrics)
+            log = [test_loss] + list(metrics[0:4]) + list(metrics[4])
             log = map(str, log)
             f.write(','.join(log) + '\n')
