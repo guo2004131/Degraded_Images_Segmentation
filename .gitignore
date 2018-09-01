@@ -13,3 +13,4 @@ Tensorboard_logs/
 *.pth
 *.txt
 *.m~
+*.sh

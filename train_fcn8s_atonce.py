@@ -14,7 +14,7 @@ configurations = {
     # same configuration as original work
     # https://github.com/shelhamer/fcn.berkeleyvision.org
     1: dict(
-        max_iteration=100000,
+        max_iteration=60000,
         lr=1.0e-10,
         momentum=0.99,
         weight_decay=0.0005,
@@ -108,7 +108,7 @@ def main():
         model=model,
         optimizer=optim,
         train_loader=train_loader,
-        val_loader=test_loader,
+        val_loader=val_loader,
         test_loader=test_loader,
         out=out,
         max_iter=cfg['max_iteration'],

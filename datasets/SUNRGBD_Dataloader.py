@@ -227,7 +227,7 @@ class SUNSeg(data.Dataset):
             return img, lbl
 
     def transform(self, img, lbl):
-        random_crop = False
+        random_crop = True
         if random_crop:
             size = (np.array(lbl.shape)*0.8).astype(np.uint32)
             img, lbl = self.random_crop(img, lbl, size)
